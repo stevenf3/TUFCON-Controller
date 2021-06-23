@@ -6,6 +6,9 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
 NavigationToolbar2Tk)
 from labjack import ljm
+from matplotlib import style
+style.use('ggplot')
+
 
 class controller(tk.Tk):
     def __init__(self):
@@ -16,15 +19,17 @@ class controller(tk.Tk):
         s = ttk.Style()
         s.configure('.', font=('Cambria'), fontsize=16)
         s.configure('TButton')
+        self.grid_rowconfigure(0,w=1)
+        self.grid_columnconfigure(0,w=1)
 
         self.frame1 = ttk.Frame(self)
         self.frame1.grid(column=0, row=0, sticky='news')
 
         self.frame2 = ttk.Frame(self)
-        self.frame2.grid(column=4, row=0, sticky='ew')
+        self.frame2.grid(column=1, row=0, sticky='nsew')
 
         self.frame3 = ttk.Frame(self)
-        self.frame3.grid(column=6, row=0, sticky='news')
+        self.frame3.grid(column=2, row=0, sticky='news')
 
         self.y = [i**3 for i in range(101)]
         self.fig1 = Figure(figsize=(5,5), dpi=100)
@@ -43,12 +48,24 @@ class controller(tk.Tk):
         self.canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
 
         self.RadicalDensityLabel = ttk.Label(self.frame1, text='Radical Density')
-        self.RadicalDensityLabel.grid(row=0,columnspan=2,sticky='ew')
+        self.RadicalDensityLabel.grid(row=0,columnspan=2)
 
         self.PlotButton = ttk.Button(self.frame3, text='Plot')
         self.PlotButton.grid(row=0, columnspan=2, sticky='ew')
 
+    def animate(self, i):
+        self.pullData = open('sampleText.txt','r').read()
+        self.dataArray = pullData.split('\n')
+        self.xar=[]
+        self.yar=[]
+        for eachLine in dataArray:
+            if len(eachLine)>1:
+                self.x, self.y = eachLine.split(',')
+                self.xar.append(int(x))
+                self.yar.append(int(y))
 
+        self.plot1.clear()
+        self.plot1(self.xar, self.yar)
     def onclose(self):
         plt.close('all')
         self.destroy()
