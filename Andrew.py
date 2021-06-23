@@ -1,8 +1,10 @@
 import math
+import numpy as np
 from time import sleep
 
 import u6
 
+TCReading = np.zeros((10,5))
 
 # Coefficients
 
@@ -189,7 +191,7 @@ if __name__ == '__main__':
         print("Cold Junction Temp: %s" % CJTEMPinC)
         print("Voltage 0 (in millivolts): %s" % TCmVolts0)
         print("Voltage 1 (in millivolts): %s" % TCmVolts1)
-        
+
 
         totalMVolts0 = TCmVolts0 + tempCToMVolts(CJTEMPinC)
         totalMVolts1 = TCmVolts1 + tempCToMVolts(CJTEMPinC)
@@ -197,4 +199,12 @@ if __name__ == '__main__':
         print("Temperature 0: %s\n" % mVoltsToTempC(totalMVolts0))
         print("Temperature 1: %s\n" % mVoltsToTempC(totalMVolts1))
 
+        TCReading[i][0] = i
+        TCReading[i][1] = TCmVolts0
+        TCReading[i][2] = TCmVolts1
+        TCReading[i][3] = mVoltsToTempC(totalMVolts0)
+        TCReading[i][4] = mVoltsToTempC(totalMVolts1)
+
+
         sleep(1)
+print(TCReading)
