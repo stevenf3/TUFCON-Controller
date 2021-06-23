@@ -4,7 +4,6 @@ from time import sleep
 
 import u6
 
-TCReading = np.zeros((10,5))
 
 # Coefficients
 
@@ -173,38 +172,44 @@ def mVoltsToTempC(mVolts):
     coeffs = voltsToTempConstants(mVolts)
     return evaluatePolynomial(coeffs, mVolts)
 
+def GetTemp(d,AIN):
+    CJTEMPinC = d.getTemperature() + 2.5 - 273.15
+    TCmVolts = d.getAIN(AIN, resolutionIndex=8, gainIndex=3) * 1000
+    totalMVolts = TCmVolts + tempCToMVolts(CJTEMPinC)
+    Temp = mVoltsToTempC(totalMVolts)
+    return(Temp)
 
 if __name__ == '__main__':
     d = u6.U6()
     d.getCalibrationData()
-
+    list = []
     for i in range(10):
-        # The cold junction temperature
-        # Important: Must be in Celsius
-        CJTEMPinC = d.getTemperature() + 2.5 - 273.15
-
-        # The thermocouple's analog voltage
-        # Important: Must be in millivolts
-        TCmVolts0 = d.getAIN(0, resolutionIndex=8, gainIndex=3) * 1000
-        TCmVolts1 = d.getAIN(1, resolutionIndex=8, gainIndex=3) * 1000
-
-        print("Cold Junction Temp: %s" % CJTEMPinC)
-        print("Voltage 0 (in millivolts): %s" % TCmVolts0)
-        print("Voltage 1 (in millivolts): %s" % TCmVolts1)
-
-
-        totalMVolts0 = TCmVolts0 + tempCToMVolts(CJTEMPinC)
-        totalMVolts1 = TCmVolts1 + tempCToMVolts(CJTEMPinC)
-
-        print("Temperature 0: %s\n" % mVoltsToTempC(totalMVolts0))
-        print("Temperature 1: %s\n" % mVoltsToTempC(totalMVolts1))
-
-        TCReading[i][0] = i
-        TCReading[i][1] = TCmVolts0
-        TCReading[i][2] = TCmVolts1
-        TCReading[i][3] = mVoltsToTempC(totalMVolts0)
-        TCReading[i][4] = mVoltsToTempC(totalMVolts1)
-
-
+        list.append([i,GetTemp(d,0),GetTemp(d,1)])
         sleep(1)
-print(TCReading)
+    print(list)
+
+
+
+'''
+            # The cold junction temperature
+            # Important: Must be in Celsius
+            CJTEMPinC = d.getTemperature() + 2.5 - 273.15
+
+            # The thermocouple's analog voltage
+            # Important: Must be in millivolts
+            TCmVolts0 = d.getAIN(0, resolutionIndex=8, gainIndex=3) * 1000
+            TCmVolts1 = d.getAIN(1, resolutionIndex=8, gainIndex=3) * 1000
+
+            print("Cold Junction Temp: %s" % CJTEMPinC)
+            print("Voltage 0 (in millivolts): %s" % TCmVolts0)
+            print("Voltage 1 (in millivolts): %s" % TCmVolts1)
+
+
+            totalMVolts0 = TCmVolts0 + tempCToMVolts(CJTEMPinC)
+            totalMVolts1 = TCmVolts1 + tempCToMVolts(CJTEMPinC)
+
+            print("Temperature 0: %s\n" % mVoltsToTempC(totalMVolts0))
+            print("Temperature 1: %s\n" % mVoltsToTempC(totalMVolts1))
+
+            sleep(1)
+'''
