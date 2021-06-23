@@ -5,6 +5,7 @@ from tkinter import ttk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
 NavigationToolbar2Tk)
+from labjack import ljm
 
 class controller(tk.Tk):
     def __init__(self):
@@ -20,22 +21,47 @@ class controller(tk.Tk):
         self.frame1.grid(column=0, row=0, sticky='news')
 
         self.frame2 = ttk.Frame(self)
-        self.frame2.grid(column=1, row=0, sticky='news')
+        self.frame2.grid(column=4, row=0, sticky='news')
 
         self.frame3 = ttk.Frame(self)
-        self.frame3.grid(column=3, row=0, sticky='news')
+        self.frame3.grid(column=6, row=0, sticky='news')
 
-        self.fig, self.ax = plt.subplots(figsize=(5,5))
+        self.y1 = [i**3 for i in range(101)]
+        self.fig1 = Figure(figsize=(5,5), dpi=100)
+        self.plot1 = self.fig1.add_subplot(111)
 
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame1)
+        self.plot1.plot(self.y1)
+
+        self.canvas1 = FigureCanvasTkAgg(self.fig1, master=self.frame2)
+        self.canvas1.draw()
+
+        self.canvas1.get_tk_widget().pack(side='top', fill='both', expand=1)
+        print('working')
+
+        self.toolbar1 = NavigationToolbar2Tk(self.canvas1, self.frame2)
+        self.toolbar1.update()
+        self.canvas1.get_tk_widget().pack(side='top', fill='both', expand=True)
+
+        self.RadicalDensityLabel = ttk.Label(self.frame1, text='Radical Density')
+        self.RadicalDensityLabel.grid(row=0,columnspan=2,sticky='nw')
+
+        self.PlotButton = ttk.Button(self.frame3, text='Plot', command=self.plot)
+        self.PlotButton.grid(row=0, columnspan=2, sticky='ne')
+    def plot(self):
+        self.y = [i**2 for i in range(101)]
+        self.fig = Figure(figsize=(5,5))
+        self.plot2 = self.fig.add_subplot(111)
+
+        self.plot2.plot(self.y)
+        self.canvas = FigureCanvasTkAgg(self.fig, master = self.frame2)
         self.canvas.draw()
 
         self.canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
+        print('working')
 
-        self.toolbar = NavigationToolbar2Tk(self.canvas, self.frame1)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self.frame2)
         self.toolbar.update()
         self.canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
-
 
     def onclose(self):
         plt.close('all')
