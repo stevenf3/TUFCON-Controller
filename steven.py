@@ -6,8 +6,27 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
 NavigationToolbar2Tk)
 from labjack import ljm
+import matplotlib.animation as animation
 from matplotlib import style
+from time import sleep
 style.use('ggplot')
+
+f = Figure(figsize=(5,5), dpi=100)
+a = f.add_subplot()
+
+def animate(i):
+    pullData = open("sampleText.txt","r").read()
+    dataList = pullData.split('\n')
+    xList = []
+    yList = []
+    for eachLine in dataList:
+        if len(eachLine) > 1:
+            x, y = eachLine.split(',')
+            xList.append(int(x))
+            yList.append(int(y))
+
+    a.clear()
+    a.plot(xList, yList)
 
 
 class controller(tk.Tk):
@@ -37,7 +56,7 @@ class controller(tk.Tk):
 
         self.plot1.plot(self.y)
 
-        self.canvas = FigureCanvasTkAgg(self.fig1, master=self.frame2)
+        self.canvas = FigureCanvasTkAgg(f, master=self.frame2)
         self.canvas.draw()
 
         self.canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
@@ -50,8 +69,8 @@ class controller(tk.Tk):
         self.RadicalDensityLabel = ttk.Label(self.frame1, text='Radical Density')
         self.RadicalDensityLabel.grid(row=0,columnspan=2)
 
-        self.PlotButton = ttk.Button(self.frame3, text='Plot')
-        self.PlotButton.grid(row=0, columnspan=2, sticky='ew')
+        self.LoopButton = ttk.Button(self.frame3, text='Loop', command=self.scanning)
+        self.LoopButton.grid(row=0, columnspan=2, sticky='ew')
 
     def animate(self, i):
         self.pullData = open('sampleText.txt','r').read()
@@ -70,9 +89,16 @@ class controller(tk.Tk):
         plt.close('all')
         self.destroy()
 
+    def scanning(self):
+        while True:
+            print("test")
+            sleep(1)
+
+
 
 if __name__ == '__main__':
     app = controller()
+    ani = animation.FuncAnimation(f,animate, interval=1000)
     app.wm_title('TUFCON Controller')
 
     app.mainloop()
