@@ -179,12 +179,17 @@ def GetTemp(d,AIN):
     Temp = mVoltsToTempC(totalMVolts)
     return(Temp)
 
+def RadicalTemps(d,AINA, AINB):
+    TempA = GetTemp(d,AINA)
+    TempB = GetTemp(d,AINB)
+    return(TempA,TempB)
+
 if __name__ == '__main__':
     d = u6.U6()
     d.getCalibrationData()
     list = []
     for i in range(10):
-        list.append([i,GetTemp(d,0),GetTemp(d,1)])
+        list.append([i,RadicalTemps(d,0,1)])
         sleep(1)
     print(list)
 
