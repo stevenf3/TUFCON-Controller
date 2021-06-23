@@ -173,13 +173,13 @@ def mVoltsToTempC(mVolts):
     return evaluatePolynomial(coeffs, mVolts)
 
 def GetTemp(d,AIN):
-    CJTEMPinC = d.getTemperature() + 2.5 - 273.15
-    TCmVolts = d.getAIN(AIN, resolutionIndex=8, gainIndex=3) * 1000
+    CJTEMPinC = d.getTemperature() + 2.5 - 273. #Cold junction temperature
+    TCmVolts = d.getAIN(AIN, resolutionIndex=8, gainIndex=3) * 1000 #TC analog voltage
     totalMVolts = TCmVolts + tempCToMVolts(CJTEMPinC)
     Temp = mVoltsToTempC(totalMVolts)
     return(Temp)
 
-def RadicalTemps(d,AINA, AINB):
+def RadicalTemps(d,AINA,AINB):
     TempA = GetTemp(d,AINA)
     TempB = GetTemp(d,AINB)
     return(TempA,TempB)
@@ -192,29 +192,3 @@ if __name__ == '__main__':
         list.append([i,RadicalTemps(d,0,1)])
         sleep(1)
     print(list)
-
-
-
-'''
-            # The cold junction temperature
-            # Important: Must be in Celsius
-            CJTEMPinC = d.getTemperature() + 2.5 - 273.15
-
-            # The thermocouple's analog voltage
-            # Important: Must be in millivolts
-            TCmVolts0 = d.getAIN(0, resolutionIndex=8, gainIndex=3) * 1000
-            TCmVolts1 = d.getAIN(1, resolutionIndex=8, gainIndex=3) * 1000
-
-            print("Cold Junction Temp: %s" % CJTEMPinC)
-            print("Voltage 0 (in millivolts): %s" % TCmVolts0)
-            print("Voltage 1 (in millivolts): %s" % TCmVolts1)
-
-
-            totalMVolts0 = TCmVolts0 + tempCToMVolts(CJTEMPinC)
-            totalMVolts1 = TCmVolts1 + tempCToMVolts(CJTEMPinC)
-
-            print("Temperature 0: %s\n" % mVoltsToTempC(totalMVolts0))
-            print("Temperature 1: %s\n" % mVoltsToTempC(totalMVolts1))
-
-            sleep(1)
-'''
