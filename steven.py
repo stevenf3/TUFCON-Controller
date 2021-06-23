@@ -9,11 +9,14 @@ from labjack import ljm
 import matplotlib.animation as animation
 from matplotlib import style
 from time import sleep
+from Andrew import *
 style.use('ggplot')
 
 f = Figure(figsize=(5,5), dpi=100)
 a = f.add_subplot()
-
+list = []
+running = False
+GoldProbeTemp = 0.00
 def animate(i):
     pullData = open("sampleText.txt","r").read()
     dataList = pullData.split('\n')
@@ -27,6 +30,18 @@ def animate(i):
 
     a.clear()
     a.plot(xList, yList)
+
+def scanning():
+    tempsfile = open("temps.txt","w")
+    if running:
+        list.append(RadicalTemps(u6.U6(), 0, 1))
+        GoldProbeTemp = list[-1][0]
+        SSProbeTemp = list[-1][1]
+        print(GoldProbeTemp, SSProbeTemp)
+
+
+    app.after(1000, scanning)
+
 
 
 class controller(tk.Tk):
@@ -69,8 +84,23 @@ class controller(tk.Tk):
         self.RadicalDensityLabel = ttk.Label(self.frame1, text='Radical Density')
         self.RadicalDensityLabel.grid(row=0,columnspan=2)
 
-        self.LoopButton = ttk.Button(self.frame3, text='Loop', command=self.scanning)
-        self.LoopButton.grid(row=0, columnspan=2, sticky='ew')
+        self.StartScan = ttk.Button(self.frame3, text='Start Scan', command=self.startscan)
+        self.StartScan.grid(row=0, columnspan=2, sticky='ew')
+
+        self.StopScan = ttk.Button(self.frame3, text='Stop Scan', command=self.stopscan)
+        self.StopScan.grid(row=1, columnspan=2, sticky='ew')
+
+        self.GoldProbeLabel = ttk.Label(self.frame1, text='Gold Probe:')
+        self.GoldProbeLabel.grid(row=1, columnspan=2, sticky='ew')
+
+        self.GoldProbe = ttk.Label(self.frame1, text=str(GoldProbeTemp))
+        self.GoldProbe.grid(row=2, columnspan=2, sticky='ew')
+
+        self.SSProbeLabel = ttk.Label(self.frame1, text='SS Probe:')
+        self.SSProbeLabel.grid(row=3, columnspan=2, sticky='ew')
+
+        self.SSProbe = ttk.Label(self.frame1, text='0.00')
+        self.SSProbe.grid(row=4, columnspan=2, sticky='ew')
 
     def animate(self, i):
         self.pullData = open('sampleText.txt','r').read()
@@ -89,10 +119,24 @@ class controller(tk.Tk):
         plt.close('all')
         self.destroy()
 
-    def scanning(self):
-        while True:
-            print("test")
-            sleep(1)
+#    def scanning(self):
+#        tempsfile = open("temps.txt","w")
+#        if running:
+#            list.append(RadicalTemps(u6.U6(), 0, 1))
+#            print(list[-1])
+#            sleep(1)
+
+    def startscan(self):
+        global running
+        running = True
+        print('Scan Started')
+
+    def stopscan(self):
+        global running
+        running = False
+        print('Scan Finished')
+        print(list)
+
 
 
 
@@ -100,5 +144,5 @@ if __name__ == '__main__':
     app = controller()
     ani = animation.FuncAnimation(f,animate, interval=1000)
     app.wm_title('TUFCON Controller')
-
+    app.after(1000, scanning)
     app.mainloop()
