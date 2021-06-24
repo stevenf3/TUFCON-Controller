@@ -31,16 +31,7 @@ def animate(i):
     a.clear()
     a.plot(xList, yList)
 
-def scanning():
-    tempsfile = open("temps.txt","w")
-    if running:
-        list.append(RadicalTemps(u6.U6(), 0, 1))
-        GoldProbeTemp = list[-1][0]
-        SSProbeTemp = list[-1][1]
-        print(GoldProbeTemp, SSProbeTemp)
 
-
-    app.after(1000, scanning)
 
 
 
@@ -93,7 +84,7 @@ class controller(tk.Tk):
         self.GoldProbeLabel = ttk.Label(self.frame1, text='Gold Probe:')
         self.GoldProbeLabel.grid(row=1, columnspan=2, sticky='ew')
 
-        self.GoldProbe = ttk.Label(self.frame1, text=str(GoldProbeTemp))
+        self.GoldProbe = ttk.Label(self.frame1, text='0.00')
         self.GoldProbe.grid(row=2, columnspan=2, sticky='ew')
 
         self.SSProbeLabel = ttk.Label(self.frame1, text='SS Probe:')
@@ -102,29 +93,9 @@ class controller(tk.Tk):
         self.SSProbe = ttk.Label(self.frame1, text='0.00')
         self.SSProbe.grid(row=4, columnspan=2, sticky='ew')
 
-    def animate(self, i):
-        self.pullData = open('sampleText.txt','r').read()
-        self.dataArray = pullData.split('\n')
-        self.xar=[]
-        self.yar=[]
-        for eachLine in dataArray:
-            if len(eachLine)>1:
-                self.x, self.y = eachLine.split(',')
-                self.xar.append(int(x))
-                self.yar.append(int(y))
-
-        self.plot1.clear()
-        self.plot1(self.xar, self.yar)
     def onclose(self):
         plt.close('all')
         self.destroy()
-
-#    def scanning(self):
-#        tempsfile = open("temps.txt","w")
-#        if running:
-#            list.append(RadicalTemps(u6.U6(), 0, 1))
-#            print(list[-1])
-#            sleep(1)
 
     def startscan(self):
         global running
@@ -136,6 +107,30 @@ class controller(tk.Tk):
         running = False
         print('Scan Finished')
         print(list)
+
+    def update(self):
+        global GP
+        GP = str(GoldProbeTemp)
+        SP = str(SSProbeTemp)
+        self.GoldProbe['text'] = GP
+        self.SSProbe['text'] = SP
+
+
+def scanning():
+    tempsfile = open("temps.txt","w")
+    global GoldProbeTemp
+    global SSProbeTemp
+    if running:
+        list.append(RadicalTemps(u6.U6(), 0, 1))
+        GoldProbeTemp = round(list[-1][0], 3)
+        SSProbeTemp = round(list[-1][1], 3)
+        print(GoldProbeTemp, SSProbeTemp)
+        app.GoldProbe['text'] = str(GoldProbeTemp)
+        app.SSProbe['text'] = str(SSProbeTemp)
+
+
+    app.after(1000, scanning)
+
 
 
 
