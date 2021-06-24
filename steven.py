@@ -12,15 +12,12 @@ from time import sleep
 from Andrew import *
 import csv
 
-#f = Figure(figsize=(5,5), dpi=100)
-#a = f.add_subplot(111)
 running = False
 
 class controller(tk.Tk):
     def __init__(self):
         super().__init__()
         self.protocol('WM_DELETE_WINDOW', self.onclose)
-
 
         self.list =[]
         self.timelist = []
@@ -43,7 +40,7 @@ class controller(tk.Tk):
 
         self.fig1 = Figure(figsize=(5,5), dpi=100)
         self.plot1 = self.fig1.add_subplot(111)
-
+        plt.gca().set_ylim(0)
 
         self.canvas = FigureCanvasTkAgg(self.fig1, master=self.frame2)
         self.canvas.draw()
@@ -58,6 +55,9 @@ class controller(tk.Tk):
         self.RadicalDensityLabel = ttk.Label(self.frame1, text='Radical Density')
         self.RadicalDensityLabel.grid(row=0,columnspan=2)
 
+        self.RadicalDensity = ttk.Label(self.frame1, text='0.00')
+        self.RadicalDensity.grid(row=1, columnspan=2)
+
         self.StartScan = ttk.Button(self.frame3, text='Start Scan', command=self.startscan)
         self.StartScan.grid(row=0, columnspan=2, sticky='ew')
 
@@ -65,20 +65,22 @@ class controller(tk.Tk):
         self.StopScan.grid(row=1, columnspan=2, sticky='ew')
 
         self.GoldProbeLabel = ttk.Label(self.frame1, text='Gold Probe (deg C):')
-        self.GoldProbeLabel.grid(row=1, columnspan=2, sticky='ew')
+        self.GoldProbeLabel.grid(row=2, columnspan=2, sticky='ew')
 
         self.GoldProbe = ttk.Label(self.frame1, text='0.00')
-        self.GoldProbe.grid(row=2, columnspan=2, sticky='ew')
+        self.GoldProbe.grid(row=3, columnspan=2, sticky='ew')
 
         self.SSProbeLabel = ttk.Label(self.frame1, text='SS Probe (deg C):')
-        self.SSProbeLabel.grid(row=3, columnspan=2, sticky='ew')
+        self.SSProbeLabel.grid(row=4, columnspan=2, sticky='ew')
 
         self.SSProbe = ttk.Label(self.frame1, text='0.00')
-        self.SSProbe.grid(row=4, columnspan=2, sticky='ew')
+        self.SSProbe.grid(row=5, columnspan=2, sticky='ew')
 
-        self.ExportData = ttk.Button(self.frame3, text='Export Data')
+        self.ExportData = ttk.Button(self.frame3, text='Export Data', command=self.exportdata)
         self.ExportData.grid()
         self.ExportData.grid_forget()
+
+
 
     def onclose(self):
         plt.close('all')
@@ -121,6 +123,20 @@ class controller(tk.Tk):
                 self.canvas.draw()
 
         self.after(1000, self.scanning)
+
+    def exportdata(self):
+        self.totallist = []
+        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature']
+        for i in range(len(self.list)):
+            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i]]
+            self.totallist.append(newentry)
+        print(self.totallist)
+        with open('TemperatureList.csv', 'a') as templist:
+            writer = csv.writer(templist)
+
+            writer.writerow(self.fields)
+            writer.writerows(self.totallist)
+
 
 
 if __name__ == '__main__':
