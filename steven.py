@@ -15,7 +15,6 @@ import csv
 #f = Figure(figsize=(5,5), dpi=100)
 #a = f.add_subplot(111)
 running = False
-GoldProbeTemp = 0.00
 
 class controller(tk.Tk):
     def __init__(self):
