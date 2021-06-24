@@ -10,46 +10,23 @@ import matplotlib.animation as animation
 from matplotlib import style
 from time import sleep
 from Andrew import *
-style.use('ggplot')
+import csv
 
-f = Figure(figsize=(5,5), dpi=100)
-a = f.add_subplot()
-list = []
+#f = Figure(figsize=(5,5), dpi=100)
+#a = f.add_subplot(111)
 running = False
 GoldProbeTemp = 0.00
-def animate(i):
-    pullData = open("sampleText.txt","r").read()
-    dataList = pullData.split('\n')
-    xList = []
-    yList = []
-    for eachLine in dataList:
-        if len(eachLine) > 1:
-            x, y = eachLine.split(',')
-            xList.append(int(x))
-            yList.append(int(y))
-
-    a.clear()
-    a.plot(xList, yList)
-
-def scanning():
-    tempsfile = open("temps.txt","w")
-    if running:
-        list.append(RadicalTemps(u6.U6(), 0, 1))
-        GoldProbeTemp = list[-1][0]
-        SSProbeTemp = list[-1][1]
-        print(GoldProbeTemp, SSProbeTemp)
-
-
-    app.after(1000, scanning)
-
-
 
 class controller(tk.Tk):
     def __init__(self):
         super().__init__()
-
         self.protocol('WM_DELETE_WINDOW', self.onclose)
 
+
+        self.list =[]
+        self.timelist = []
+        self.GoldProbeTempList = []
+        self.SSProbeTempList = []
         s = ttk.Style()
         s.configure('.', font=('Cambria'), fontsize=16)
         s.configure('TButton')
@@ -65,13 +42,11 @@ class controller(tk.Tk):
         self.frame3 = ttk.Frame(self)
         self.frame3.grid(column=2, row=0, sticky='news')
 
-        self.y = [i**3 for i in range(101)]
         self.fig1 = Figure(figsize=(5,5), dpi=100)
         self.plot1 = self.fig1.add_subplot(111)
 
-        self.plot1.plot(self.y)
 
-        self.canvas = FigureCanvasTkAgg(f, master=self.frame2)
+        self.canvas = FigureCanvasTkAgg(self.fig1, master=self.frame2)
         self.canvas.draw()
 
         self.canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
@@ -90,41 +65,25 @@ class controller(tk.Tk):
         self.StopScan = ttk.Button(self.frame3, text='Stop Scan', command=self.stopscan)
         self.StopScan.grid(row=1, columnspan=2, sticky='ew')
 
-        self.GoldProbeLabel = ttk.Label(self.frame1, text='Gold Probe:')
+        self.GoldProbeLabel = ttk.Label(self.frame1, text='Gold Probe (deg C):')
         self.GoldProbeLabel.grid(row=1, columnspan=2, sticky='ew')
 
-        self.GoldProbe = ttk.Label(self.frame1, text=str(GoldProbeTemp))
+        self.GoldProbe = ttk.Label(self.frame1, text='0.00')
         self.GoldProbe.grid(row=2, columnspan=2, sticky='ew')
 
-        self.SSProbeLabel = ttk.Label(self.frame1, text='SS Probe:')
+        self.SSProbeLabel = ttk.Label(self.frame1, text='SS Probe (deg C):')
         self.SSProbeLabel.grid(row=3, columnspan=2, sticky='ew')
 
         self.SSProbe = ttk.Label(self.frame1, text='0.00')
         self.SSProbe.grid(row=4, columnspan=2, sticky='ew')
 
-    def animate(self, i):
-        self.pullData = open('sampleText.txt','r').read()
-        self.dataArray = pullData.split('\n')
-        self.xar=[]
-        self.yar=[]
-        for eachLine in dataArray:
-            if len(eachLine)>1:
-                self.x, self.y = eachLine.split(',')
-                self.xar.append(int(x))
-                self.yar.append(int(y))
+        self.ExportData = ttk.Button(self.frame3, text='Export Data')
+        self.ExportData.grid()
+        self.ExportData.grid_forget()
 
-        self.plot1.clear()
-        self.plot1(self.xar, self.yar)
     def onclose(self):
         plt.close('all')
         self.destroy()
-
-#    def scanning(self):
-#        tempsfile = open("temps.txt","w")
-#        if running:
-#            list.append(RadicalTemps(u6.U6(), 0, 1))
-#            print(list[-1])
-#            sleep(1)
 
     def startscan(self):
         global running
@@ -135,14 +94,38 @@ class controller(tk.Tk):
         global running
         running = False
         print('Scan Finished')
-        print(list)
+        print(self.list)
+        self.ExportData.grid(row=2, columnspan=2, sticky='ew')
 
 
+    def scanning(self):
+        with open('temps.txt','a') as temptxt:
+            if running:
+                self.list.append(RadicalTemps(u6.U6(), 0, 1))
+                self.timelist.append(len(self.list))
+                self.GoldProbeTemp = round(self.list[-1][0], 3)
+                self.SSProbeTemp = round(self.list[-1][1], 3)
+
+                self.GoldProbeTempList.append(self.GoldProbeTemp)
+                self.SSProbeTempList.append(self.SSProbeTemp)
+
+                print(self.GoldProbeTemp, self.SSProbeTemp)
+                print(self.timelist[-1])
+                self.GoldProbe['text'] = str(self.GoldProbeTemp)
+                self.SSProbe['text'] = str(self.SSProbeTemp)
+                L = "{},{}\n".format(self.GoldProbeTemp, self.SSProbeTemp)
+                temptxt.write(L)
+
+
+                self.plot1.plot(self.timelist, self.GoldProbeTempList, color='orange')
+                self.plot1.plot(self.timelist, self.SSProbeTempList, color='blue')
+                self.canvas.draw()
+
+        self.after(1000, self.scanning)
 
 
 if __name__ == '__main__':
     app = controller()
-    ani = animation.FuncAnimation(f,animate, interval=1000)
     app.wm_title('TUFCON Controller')
-    app.after(1000, scanning)
+    app.after(1000, app.scanning)
     app.mainloop()
