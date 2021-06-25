@@ -5,7 +5,6 @@ from tkinter import ttk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
 NavigationToolbar2Tk)
-from labjack import ljm
 import matplotlib.animation as animation
 from matplotlib import style
 from time import sleep
@@ -31,19 +30,32 @@ class controller(tk.Tk):
         self.grid_rowconfigure(0,w=1)
         self.grid_columnconfigure(0,w=1)
 
-        self.maxlim = 40
+        self.LJ = u6.U6()
+
+        self.maxlim1 = 40
+        self.maxlim2 = 40
+
+        self.xmax2 = 1
+        self.xmax1 = self.xmax2 - 60
 
         self.frame1 = ttk.Frame(self)
         self.frame1.grid(column=0, row=0, sticky='news')
 
-        self.frame2 = ttk.Frame(self)
-        self.frame2.grid(column=1, row=0, sticky='nsew')
+        self.notebook = ttk.Notebook(self)
+        self.notebook.grid(column=1, row=0, sticky='news')
+
+        self.frame2 = ttk.Frame(self.notebook)
+        self.notebook.add(self.frame2, text='Temperatures')
+
+        self.frame2b = ttk.Frame(self.notebook)
+        self.notebook.add(self.frame2b, text='Radical Density')
 
         self.frame3 = ttk.Frame(self)
         self.frame3.grid(column=2, row=0, sticky='news')
 
         self.fig1 = Figure(figsize=(5,5), dpi=100)
-        self.plot1 = self.fig1.add_subplot(111, ylim=(0,self.maxlim))
+        self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
+        self.plot2 = self.fig1.add_subplot(212, ylim=(0, self.maxlim1))
 
 
         self.canvas = FigureCanvasTkAgg(self.fig1, master=self.frame2)
@@ -80,6 +92,12 @@ class controller(tk.Tk):
         self.SSProbe = ttk.Label(self.frame1, text='0.00')
         self.SSProbe.grid(row=5, columnspan=2, sticky='ew')
 
+        self.DifferenceLabel = ttk.Label(self.frame1, text = 'Difference (deg C):')
+        self.DifferenceLabel.grid(row=6, columnspan=2, sticky='ew')
+
+        self.Difference = ttk.Label(self.frame1, text = '0.00')
+        self.Difference.grid(row=7, columnspan=2, sticky='ew')
+
         self.ExportData = ttk.Button(self.frame3, text='Export Data', command=self.choosefile)
         self.ExportData.grid()
         self.ExportData.grid_forget()
@@ -97,13 +115,10 @@ class controller(tk.Tk):
     def startscan(self):
         global running
         running = True
-        print('Scan Started')
 
     def stopscan(self):
         global running
         running = False
-        print('Scan Finished')
-        print(self.list)
         self.ExportData.grid(row=2, columnspan=2, sticky='ew')
         self.ResetPlot.grid(row=3, columnspan=2, sticky='ew')
 
@@ -111,25 +126,40 @@ class controller(tk.Tk):
     def scanning(self):
         with open('temps.txt','a') as temptxt:
             if running:
-                self.list.append(RadicalTemps(u6.U6(), 0, 1))
+                self.list.append(RadicalTemps(self.LJ, 0, 1))
                 self.timelist.append(len(self.list))
                 self.GoldProbeTemp = round(self.list[-1][0], 3)
                 self.SSProbeTemp = round(self.list[-1][1], 3)
-
+                self.DifferenceTemp = round((self.GoldProbeTemp - self.SSProbeTemp), 3)
                 self.GoldProbeTempList.append(self.GoldProbeTemp)
                 self.SSProbeTempList.append(self.SSProbeTemp)
 
-                print(self.GoldProbeTemp, self.SSProbeTemp)
-                print(self.timelist[-1])
                 self.GoldProbe['text'] = str(self.GoldProbeTemp)
                 self.SSProbe['text'] = str(self.SSProbeTemp)
-                self.maxlim = max(max(self.list)) + 5
+                self.Difference['text'] = str(self.DifferenceTemp)
+                self.maxlim1 = max(max(self.list)) + 5
+
+                self.last60 = self.list[-60:]
+                self.maxlim2 = max(max(self.last60)) + 5
+
+                self.xmax2 = self.timelist[-1]
+
+                if (self.timelist[-1] - 60) <= 0:
+                    self.xmax1 = 0
+                else:
+                    self.xmax1 = self.xmax2 - 60
 
 
                 self.plot1.remove()
-                self.plot1 = self.fig1.add_subplot(111, ylim=(0,self.maxlim))
+                self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
                 self.plot1.plot(self.timelist, self.GoldProbeTempList, color='orange')
                 self.plot1.plot(self.timelist, self.SSProbeTempList, color='blue')
+
+
+                self.plot2.remove()
+                self.plot2 = self.fig1.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(0, self.maxlim2))
+                self.plot2.plot(self.timelist, self.GoldProbeTempList, color='orange')
+                self.plot2.plot(self.timelist, self.SSProbeTempList, color='blue')
                 self.canvas.draw()
 
 
@@ -171,7 +201,6 @@ class controller(tk.Tk):
 
     def reset(self):
         self.list.clear()
-        print(self.list)
 
 
 
