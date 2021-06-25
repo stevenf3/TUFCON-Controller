@@ -11,6 +11,8 @@ from matplotlib import style
 from time import sleep
 from Andrew import *
 import csv
+import tkinter.filedialog as tkfd
+import os
 
 running = False
 
@@ -29,6 +31,8 @@ class controller(tk.Tk):
         self.grid_rowconfigure(0,w=1)
         self.grid_columnconfigure(0,w=1)
 
+        self.maxlim = 40
+
         self.frame1 = ttk.Frame(self)
         self.frame1.grid(column=0, row=0, sticky='news')
 
@@ -39,8 +43,8 @@ class controller(tk.Tk):
         self.frame3.grid(column=2, row=0, sticky='news')
 
         self.fig1 = Figure(figsize=(5,5), dpi=100)
-        self.plot1 = self.fig1.add_subplot(111)
-        plt.gca().set_ylim(0)
+        self.plot1 = self.fig1.add_subplot(111, ylim=(0,self.maxlim))
+
 
         self.canvas = FigureCanvasTkAgg(self.fig1, master=self.frame2)
         self.canvas.draw()
@@ -76,9 +80,13 @@ class controller(tk.Tk):
         self.SSProbe = ttk.Label(self.frame1, text='0.00')
         self.SSProbe.grid(row=5, columnspan=2, sticky='ew')
 
-        self.ExportData = ttk.Button(self.frame3, text='Export Data', command=self.exportdata)
+        self.ExportData = ttk.Button(self.frame3, text='Export Data', command=self.choosefile)
         self.ExportData.grid()
         self.ExportData.grid_forget()
+
+        self.ResetPlot = ttk.Button(self.frame3, text='Reset Plot', command=self.reset)
+        self.ResetPlot.grid()
+        self.ResetPlot.grid_forget()
 
 
 
@@ -97,6 +105,7 @@ class controller(tk.Tk):
         print('Scan Finished')
         print(self.list)
         self.ExportData.grid(row=2, columnspan=2, sticky='ew')
+        self.ResetPlot.grid(row=3, columnspan=2, sticky='ew')
 
 
     def scanning(self):
@@ -114,13 +123,15 @@ class controller(tk.Tk):
                 print(self.timelist[-1])
                 self.GoldProbe['text'] = str(self.GoldProbeTemp)
                 self.SSProbe['text'] = str(self.SSProbeTemp)
-                L = "{},{}\n".format(self.GoldProbeTemp, self.SSProbeTemp)
-                temptxt.write(L)
+                self.maxlim = max(max(self.list)) + 5
 
 
+                self.plot1.remove()
+                self.plot1 = self.fig1.add_subplot(111, ylim=(0,self.maxlim))
                 self.plot1.plot(self.timelist, self.GoldProbeTempList, color='orange')
                 self.plot1.plot(self.timelist, self.SSProbeTempList, color='blue')
                 self.canvas.draw()
+
 
         self.after(1000, self.scanning)
 
@@ -136,6 +147,33 @@ class controller(tk.Tk):
 
             writer.writerow(self.fields)
             writer.writerows(self.totallist)
+
+    def choosefile(self):
+        self.totallist = []
+        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature']
+        self.file = tkfd.asksaveasfilename(
+            parent=self, initialdir='.',
+            title='Choose File',
+            filetype=[
+                ('CSV Files', '.csv'),
+                ('Text Files', '.txt')
+            ])
+        print(os.path.basename(self.file))
+        for i in range(len(self.list)):
+            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i]]
+            self.totallist.append(newentry)
+
+        with open(self.file, 'w') as savefile:
+            filewriter = csv.writer(savefile)
+
+            filewriter.writerow(self.fields)
+            filewriter.writerows(self.totallist)
+
+    def reset(self):
+        self.list.clear()
+        print(self.list)
+
+
 
 
 
