@@ -34,9 +34,13 @@ class controller(tk.Tk):
 
         self.maxlim1 = 40
         self.maxlim2 = 40
+        self.maxlim3 = 2* 10**15
+        self.maxlim4 = 2 * 10 **15
 
         self.xmax2 = 1
-        self.xmax1 = self.xmax2 - 60
+        self.xmax1 = 0
+        self.xmax3 = 0
+        self.xmax4 = 1
 
         self.frame1 = ttk.Frame(self)
         self.frame1.grid(column=0, row=0, sticky='news')
@@ -57,12 +61,18 @@ class controller(tk.Tk):
         self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
         self.plot2 = self.fig1.add_subplot(212, ylim=(0, self.maxlim1))
 
+        self.fig2 = Figure(figsize=(5,5), dpi=100)
+        self.plot3 = self.fig2.add_subplot(211, ylim=(0,self.maxlim3))
+
 
         self.canvas = FigureCanvasTkAgg(self.fig1, master=self.frame2)
         self.canvas.draw()
 
+        self.canvas2 = FigureCanvasTkAgg(self.fig2, master=self.frame2b)
+        self.canvas2.draw()
+
         self.canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
-        print('working')
+        print('Running')
 
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.frame2)
         self.toolbar.update()
@@ -160,7 +170,17 @@ class controller(tk.Tk):
                 self.plot2 = self.fig1.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(0, self.maxlim2))
                 self.plot2.plot(self.timelist, self.GoldProbeTempList, color='orange')
                 self.plot2.plot(self.timelist, self.SSProbeTempList, color='blue')
+
                 self.canvas.draw()
+
+                self.plot3.remove()
+                self.plot3 = self.fig2.add_subplot(211, ylim=(0,self.maxlim3))
+
+                self.plot4.remove()
+                self.plot4 = self.fig2.add_subplot(212, ylim=(0,self.maxlim4))
+
+
+                self.canvas2.draw()
 
 
         self.after(1000, self.scanning)
