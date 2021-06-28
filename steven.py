@@ -15,12 +15,12 @@ import os
 import math
 
 running = False
-WD = 430530 ##J/mol
+WD = 7.17 * (10**-19) ##J/atom
 L = 6.35 * (10**-3) ##m
-D = 0.508 * (10**-3) ##mm
+D = 0.508 * (10**-3) ##m
 
 A = np.pi * (D/2)**2
-SA = 2*np.pi * D/2 * (L + D/2)\
+SA = 2*np.pi * D/2 * (L + D/2)
 
 GammaGold = 0.115
 GammaSS = 0.100
@@ -131,6 +131,12 @@ class controller(tk.Tk):
         self.ResetPlot.grid()
         self.ResetPlot.grid_forget()
 
+        self.ConductivityLabel = ttk.Label(self.frame1, text='SS Conductivity')
+        self.ConductivityLabel.grid(row=8, columnspan=2, sticky='ew')
+
+        self.Conductivity = ttk.Label(self.frame1, text='0.00')
+        self.Conductivity.grid(row=9, columnspan=2, sticky='ew')
+
 
 
     def onclose(self):
@@ -177,6 +183,7 @@ class controller(tk.Tk):
 
 
                 self.chi = 12.19905 + 0.01942087*self.SSProbeTemp - 0.000007456439*(self.SSProbeTemp**2)
+                self.Conductivity['text'] = str(round(self.chi, 3))
 
 
                 self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
@@ -229,7 +236,7 @@ class controller(tk.Tk):
         self.file = tkfd.asksaveasfilename(
             parent=self, initialdir='.',
             title='Choose File',
-            filetype=[
+            filetypes=[
                 ('CSV Files', '.csv'),
                 ('Text Files', '.txt')
             ])

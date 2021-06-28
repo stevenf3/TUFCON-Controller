@@ -186,7 +186,7 @@ def RadicalTemps(d,AINA,AINB):
 
 def GetRadicalDensity(TempA, TempB, S, Chi, W_D, A, L, LambdaA, LambdaB):
     v = math.sqrt((8 * (1.38*(10**-23)) * (TempB+273.15))/(1.6605*10**(-27)*np.pi))
-    n = ((8*S*Chi)/(W_D*v*A*L)) * (((TempA - TempB)+273.15)/(LambdaA - LambdaB))
+    n = ((8*S*Chi)/(W_D*v*A*L)) * (((TempA - TempB))/(LambdaA - LambdaB))
     return(n)
 
 if __name__ == '__main__':
