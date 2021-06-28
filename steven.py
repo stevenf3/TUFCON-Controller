@@ -12,9 +12,20 @@ from Andrew import *
 import csv
 import tkinter.filedialog as tkfd
 import os
+import math
 
 running = False
+WD = 430530 ##J/mol
+L = 6.35 * (10**-3) ##m
+D = 0.508 * (10**-3) ##mm
 
+A = np.pi * (D/2)**2
+SA = 2*np.pi * D/2 * (L + D/2)\
+
+GammaGold = 0.115
+GammaSS = 0.100
+
+print(A, SA)
 class controller(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -24,6 +35,7 @@ class controller(tk.Tk):
         self.timelist = []
         self.GoldProbeTempList = []
         self.SSProbeTempList = []
+        self.RadicalDensityList = []
         s = ttk.Style()
         s.configure('.', font=('Cambria'), fontsize=16)
         s.configure('TButton')
@@ -62,7 +74,8 @@ class controller(tk.Tk):
         self.plot2 = self.fig1.add_subplot(212, ylim=(0, self.maxlim1))
 
         self.fig2 = Figure(figsize=(5,5), dpi=100)
-        self.plot3 = self.fig2.add_subplot(211, ylim=(0,self.maxlim3))
+        self.plot3 = self.fig2.add_subplot(111, ylim=(0,self.maxlim3))
+    #    self.plot4 = self.fig2.add_subplot(212, ylim=(0,self.maxlim4))
 
 
         self.canvas = FigureCanvasTkAgg(self.fig1, master=self.frame2)
@@ -72,11 +85,13 @@ class controller(tk.Tk):
         self.canvas2.draw()
 
         self.canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
+        self.canvas2.get_tk_widget().pack(side='top', fill='both', expand=1)
         print('Running')
 
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.frame2)
         self.toolbar.update()
         self.canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
+        self.canvas2.get_tk_widget().pack(side='top', fill='both', expand=1)
 
         self.RadicalDensityLabel = ttk.Label(self.frame1, text='Radical Density')
         self.RadicalDensityLabel.grid(row=0,columnspan=2)
@@ -147,10 +162,11 @@ class controller(tk.Tk):
                 self.GoldProbe['text'] = str(self.GoldProbeTemp)
                 self.SSProbe['text'] = str(self.SSProbeTemp)
                 self.Difference['text'] = str(self.DifferenceTemp)
-                self.maxlim1 = max(max(self.list)) + 5
+                self.maxlim1 = 1.25 * max(max(self.list))
+
 
                 self.last60 = self.list[-60:]
-                self.maxlim2 = max(max(self.last60)) + 5
+                self.maxlim2 = 1.25 * max(max(self.last60))
 
                 self.xmax2 = self.timelist[-1]
 
@@ -159,6 +175,14 @@ class controller(tk.Tk):
                 else:
                     self.xmax1 = self.xmax2 - 60
 
+
+                self.chi = 12.19905 + 0.01942087*self.SSProbeTemp - 0.000007456439*(self.SSProbeTemp**2)
+
+
+                self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
+                self.RadicalDensity['text'] = str(self.RadicalDensityValue)
+                self.RadicalDensityList.append(self.RadicalDensityValue)
+                self.maxlim3 = 1.25 * max(self.RadicalDensityList)
 
                 self.plot1.remove()
                 self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
@@ -175,9 +199,10 @@ class controller(tk.Tk):
 
                 self.plot3.remove()
                 self.plot3 = self.fig2.add_subplot(211, ylim=(0,self.maxlim3))
+                self.plot3.plot(self.timelist, self.RadicalDensityList, color='green')
 
-                self.plot4.remove()
-                self.plot4 = self.fig2.add_subplot(212, ylim=(0,self.maxlim4))
+    #            self.plot4.remove()
+    #            self.plot4 = self.fig2.add_subplot(212, ylim=(0,self.maxlim4))
 
 
                 self.canvas2.draw()
@@ -187,9 +212,9 @@ class controller(tk.Tk):
 
     def exportdata(self):
         self.totallist = []
-        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature']
+        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature', 'Radical Density']
         for i in range(len(self.list)):
-            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i]]
+            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i]]
             self.totallist.append(newentry)
         print(self.totallist)
         with open('TemperatureList.csv', 'a') as templist:
@@ -210,7 +235,7 @@ class controller(tk.Tk):
             ])
         print(os.path.basename(self.file))
         for i in range(len(self.list)):
-            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i]]
+            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i]]
             self.totallist.append(newentry)
 
         with open(self.file, 'w') as savefile:
