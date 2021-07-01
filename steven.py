@@ -15,9 +15,9 @@ import os
 import math
 
 running = False
-WD = 7.17 * (10**-19) ##J/atom
-L = 6.35 * (10**-3) ##m
-D = 0.508 * (10**-3) ##m
+WD = 7.18 * (10**-19) ##J/molecule, dissociation energy
+L = 6.35 * (10**-3) ##m length of exposed probe
+D = 0.508 * (10**-3) ##m (diameter of probe)
 
 A = np.pi * (D/2)**2
 SA = 2*np.pi * D/2 * (L + D/2)
@@ -25,7 +25,6 @@ SA = 2*np.pi * D/2 * (L + D/2)
 GammaGold = 0.115
 GammaSS = 0.100
 
-print(A, SA)
 class controller(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -211,7 +210,8 @@ class controller(tk.Tk):
     #            self.plot4.remove()
     #            self.plot4 = self.fig2.add_subplot(212, ylim=(0,self.maxlim4))
 
-
+                self.PressureVoltage = Pressure(self.LJ, u6.AIN(2))
+                print(self.PressureVoltage)
                 self.canvas2.draw()
 
 
