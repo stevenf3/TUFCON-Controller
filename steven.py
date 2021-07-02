@@ -13,7 +13,7 @@ import csv
 import tkinter.filedialog as tkfd
 import os
 import math
-
+from convectron import *
 running = False
 WD = 7.18 * (10**-19) ##J/molecule, dissociation energy
 L = 6.35 * (10**-3) ##m length of exposed probe
@@ -35,6 +35,8 @@ class controller(tk.Tk):
         self.GoldProbeTempList = []
         self.SSProbeTempList = []
         self.RadicalDensityList = []
+        self.ConvectronPressureList = []
+
         s = ttk.Style()
         s.configure('.', font=('Cambria'), fontsize=16)
         s.configure('TButton')
@@ -130,11 +132,18 @@ class controller(tk.Tk):
         self.ResetPlot.grid()
         self.ResetPlot.grid_forget()
 
-        self.ConductivityLabel = ttk.Label(self.frame1, text='SS Conductivity')
-        self.ConductivityLabel.grid(row=8, columnspan=2, sticky='ew')
+    #    self.ConductivityLabel = ttk.Label(self.frame1, text='SS Conductivity')
+    #    self.ConductivityLabel.grid(row=8, columnspan=2, sticky='ew')
 
-        self.Conductivity = ttk.Label(self.frame1, text='0.00')
-        self.Conductivity.grid(row=9, columnspan=2, sticky='ew')
+    #    self.Conductivity = ttk.Label(self.frame1, text='0.00')
+    #    self.Conductivity.grid(row=9, columnspan=2, sticky='ew')
+
+        self.ConvectronPressureLabel = ttk.Label(self.frame1, text='Convectron Pressure')
+        self.ConvectronPressureLabel.grid(row=10, columnspan=2, sticky='ew')
+
+        self.ConvectronPressure = ttk.Label(self.frame1, text='0.00')
+        self.ConvectronPressure.grid(row=11,columnspan=2,sticky='ew')
+
 
 
 
@@ -182,13 +191,17 @@ class controller(tk.Tk):
 
 
                 self.chi = 12.19905 + 0.01942087*self.SSProbeTemp - 0.000007456439*(self.SSProbeTemp**2)
-                self.Conductivity['text'] = str(round(self.chi, 3))
+            #    self.Conductivity['text'] = str(round(self.chi, 3))
 
 
                 self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
                 self.RadicalDensity['text'] = str(self.RadicalDensityValue)
                 self.RadicalDensityList.append(self.RadicalDensityValue)
                 self.maxlim3 = 1.25 * max(self.RadicalDensityList)
+
+                self.ConvectronPressureValue = ConvectronPressure(self.LJ, 2)
+                self.ConvectronPressureList.append(self.ConvectronPressureValue)
+                self.ConvectronPressure['text'] = str(self.ConvectronPressureValue)
 
                 self.plot1.remove()
                 self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
@@ -210,9 +223,9 @@ class controller(tk.Tk):
     #            self.plot4.remove()
     #            self.plot4 = self.fig2.add_subplot(212, ylim=(0,self.maxlim4))
 
-                self.PressureVoltage = Pressure(self.LJ, u6.AIN(2))
-                print(self.PressureVoltage)
-                self.canvas2.draw()
+    #            self.PressureVoltage = Pressure(self.LJ, u6.AIN(2))
+    #            print(self.PressureVoltage)
+    #            self.canvas2.draw()
 
 
         self.after(1000, self.scanning)
@@ -232,7 +245,7 @@ class controller(tk.Tk):
 
     def choosefile(self):
         self.totallist = []
-        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature']
+        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature', 'Convectron Pressure']
         self.file = tkfd.asksaveasfilename(
             parent=self, initialdir='.',
             title='Choose File',
@@ -242,7 +255,7 @@ class controller(tk.Tk):
             ])
         print(os.path.basename(self.file))
         for i in range(len(self.list)):
-            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i]]
+            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i]]
             self.totallist.append(newentry)
 
         with open(self.file, 'w') as savefile:

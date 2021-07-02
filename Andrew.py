@@ -189,9 +189,10 @@ def GetRadicalDensity(TempA, TempB, S, Chi, W_D, A, L, LambdaA, LambdaB):
     n = ((8*S*Chi)/(W_D*v*A*L)) * (((TempA - TempB))/(LambdaA - LambdaB))
     return(n)
 
-def Pressure(d,AIN):
-    ainvoltage = d.getFeedback(AIN)
-    return(ainvoltage)
+#def Pressure(d,AIN):
+#    ainvoltage = d.getFeedback(AIN)
+#    return(ainvoltage)
+
 if __name__ == '__main__':
     d = u6.U6()
     d.getCalibrationData()
