@@ -190,7 +190,7 @@ def GetRadicalDensity(TempA, TempB, S, Chi, W_D, A, L, LambdaA, LambdaB):
     return(n)
 
 def Pressure(d,AIN):
-    ainvoltage = d.getFeedback(u6.AIN(2))
+    ainvoltage = d.getFeedback(AIN)
     return(ainvoltage)
 if __name__ == '__main__':
     d = u6.U6()
