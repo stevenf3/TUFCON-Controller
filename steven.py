@@ -30,6 +30,8 @@ class controller(tk.Tk):
     def __init__(self):
         super().__init__()
         self.protocol('WM_DELETE_WINDOW', self.onclose)
+        self.plasmapower = 'None Logged'
+        self.flowrate = 'None Logged'
 
         self.list =[]
         self.timelist = []
@@ -39,7 +41,8 @@ class controller(tk.Tk):
         self.ConvectronPressureList = []
         self.BaratronPressureList = []
         self.IonGaugePressureList = []
-
+        self.PlasmaPowerList = []
+        self.FlowRateList = []
         s = ttk.Style()
         s.configure('.', font=('Cambria'), fontsize=16)
         s.configure('TButton')
@@ -159,6 +162,31 @@ class controller(tk.Tk):
         self.IonGaugePressure = ttk.Label(self.frame1, text='0.00')
         self.IonGaugePressure.grid(row=15,columnspan=2,sticky='ew')
 
+        self.PlasmaPowerLabel = ttk.Label(self.frame1, text='Plasma Power')
+        self.PlasmaPowerLabel.grid(row=16, columnspan=2,sticky='ew')
+
+        self.PlasmaPower = ttk.Label(self.frame1, text='0.00')
+        self.PlasmaPower.grid(row=17,columnspan=2,sticky='ew')
+
+        self.FlowRateLabel = ttk.Label(self.frame1, text='Flow Rate')
+        self.FlowRateLabel.grid(row=18, columnspan=2,sticky='ew')
+
+        self.FlowRate = ttk.Label(self.frame1, text='0.00')
+        self.FlowRate.grid(row=19,columnspan=2,sticky='ew')
+
+        self.PowerEntry = tk.Entry(self.frame3)
+        self.PowerEntry.grid(row=6, columnspan=2,sticky='ew')
+
+        self.PowerEntryButton = ttk.Button(self.frame3, text='Log Plasma Power (W)', command=self.logpower)
+        self.PowerEntryButton.grid(row=7)
+
+        self.FlowRateEntry = tk.Entry(self.frame3)
+        self.FlowRateEntry.grid(row=8, columnspan=2,sticky='ew')
+
+        self.FlowRateEntryButton = ttk.Button(self.frame3, text='Log Flow Rate (sccm)', command=self.logflow)
+        self.FlowRateEntryButton.grid(row=9, columnspan=2,sticky='ew')
+
+
 
 
 
@@ -167,15 +195,35 @@ class controller(tk.Tk):
         self.destroy()
 
     def startscan(self):
-        global running
-        running = True
+        if self.flowrate == 'None Logged' and self.plasmapower == 'None Logged':
+            tk.messagebox.showinfo('Log Power','There is no logged plasma power or flow rate.')
+
+        elif self.flowrate == 'None Logged':
+            tk.messagebox.showinfo('Log Flow Rate','There is no logged flow rate')
+
+        elif self.plasmapower == 'None Logged':
+            tk.messagebox.showinfo('Logging Error','There is no logged plasma power.')
+        else:
+            global running
+            running = True
 
     def stopscan(self):
         global running
         running = False
         self.ExportData.grid(row=2, columnspan=2, sticky='ew')
-        self.ResetPlot.grid(row=3, columnspan=2, sticky='ew')
+        self.ResetPlot.grid(row=15, columnspan=2, sticky='ew')
+        self.PowerEntry.grid_forget()
+        self.PowerEntryButton.grid_forget()
+        self.FlowRateEntry.grid_forget()
+        self.FlowRateEntryButton.grid_forget()
 
+    def logpower(self):
+        self.plasmapower = self.PowerEntry.get()
+        self.PlasmaPower['text'] = str(self.plasmapower)
+
+    def logflow(self):
+        self.flowrate = self.FlowRateEntry.get()
+        self.FlowRate['text'] = str(self.flowrate)
 
     def scanning(self):
         with open('temps.txt','a') as temptxt:
@@ -187,6 +235,8 @@ class controller(tk.Tk):
                 self.DifferenceTemp = round((self.GoldProbeTemp - self.SSProbeTemp), 3)
                 self.GoldProbeTempList.append(self.GoldProbeTemp)
                 self.SSProbeTempList.append(self.SSProbeTemp)
+                self.PlasmaPowerList.append(self.plasmapower)
+                self.FlowRateList.append(self.flowrate)
 
                 self.GoldProbe['text'] = str(self.GoldProbeTemp)
                 self.SSProbe['text'] = str(self.SSProbeTemp)
@@ -219,13 +269,13 @@ class controller(tk.Tk):
                 self.ConvectronPressure['text'] = str(self.ConvectronPressureValue)
 
                 self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
-                print(self.BaratronPressureValue)
                 self.BaratronPressureList.append(self.BaratronPressureValue)
                 self.BaratronPressure['text'] = str(self.BaratronPressureValue)
 
                 self.IonGaugePressureValue = IonGaugePressure(self.LJ, 4)
                 self.IonGaugePressureList.append(self.IonGaugePressureValue)
                 self.IonGaugePressure['text'] = str(self.IonGaugePressureValue)
+
 
                 self.plot1.remove()
                 self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
@@ -269,7 +319,7 @@ class controller(tk.Tk):
 
     def choosefile(self):
         self.totallist = []
-        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature', 'Convectron Pressure', 'Baratron Pressure', 'Ion Gauge Pressure']
+        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature', 'Convectron Pressure', 'Baratron Pressure', 'Ion Gauge Pressure', 'Plasma Power', 'Flow Rate']
         self.file = tkfd.asksaveasfilename(
             parent=self, initialdir='.',
             title='Choose File',
@@ -279,7 +329,7 @@ class controller(tk.Tk):
             ])
         print(os.path.basename(self.file))
         for i in range(len(self.list)):
-            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i]]
+            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i]]
             self.totallist.append(newentry)
 
         with open(self.file, 'w') as savefile:
@@ -287,6 +337,8 @@ class controller(tk.Tk):
 
             filewriter.writerow(self.fields)
             filewriter.writerows(self.totallist)
+
+        self.ExportData.grid_forget()
 
     def reset(self):
         self.list.clear()
