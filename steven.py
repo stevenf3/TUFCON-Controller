@@ -13,7 +13,8 @@ import csv
 import tkinter.filedialog as tkfd
 import os
 import math
-from convectron import *
+from Gauges import *
+
 running = False
 WD = 7.18 * (10**-19) ##J/molecule, dissociation energy
 L = 6.35 * (10**-3) ##m length of exposed probe
@@ -36,6 +37,8 @@ class controller(tk.Tk):
         self.SSProbeTempList = []
         self.RadicalDensityList = []
         self.ConvectronPressureList = []
+        self.BaratronPressureList = []
+        self.IonGaugePressureList = []
 
         s = ttk.Style()
         s.configure('.', font=('Cambria'), fontsize=16)
@@ -138,11 +141,23 @@ class controller(tk.Tk):
     #    self.Conductivity = ttk.Label(self.frame1, text='0.00')
     #    self.Conductivity.grid(row=9, columnspan=2, sticky='ew')
 
-        self.ConvectronPressureLabel = ttk.Label(self.frame1, text='Convectron Pressure')
+        self.ConvectronPressureLabel = ttk.Label(self.frame1, text='Convectron Pressure (Torr)')
         self.ConvectronPressureLabel.grid(row=10, columnspan=2, sticky='ew')
 
         self.ConvectronPressure = ttk.Label(self.frame1, text='0.00')
         self.ConvectronPressure.grid(row=11,columnspan=2,sticky='ew')
+
+        self.BaratronPressureLabel = ttk.Label(self.frame1, text='Baratron Pressure (Torr)')
+        self.BaratronPressureLabel.grid(row=12,columnspan=2,sticky='ew')
+
+        self.BaratronPressure = ttk.Label(self.frame1, text='0.00')
+        self.BaratronPressure.grid(row=13,columnspan=2,sticky='ew')
+
+        self.IonGaugePressureLabel = ttk.Label(self.frame1, text='Ion Gauge Pressure')
+        self.IonGaugePressureLabel.grid(row=14, columnspan=2,sticky='ew')
+
+        self.IonGaugePressure = ttk.Label(self.frame1, text='0.00')
+        self.IonGaugePressure.grid(row=15,columnspan=2,sticky='ew')
 
 
 
@@ -203,6 +218,15 @@ class controller(tk.Tk):
                 self.ConvectronPressureList.append(self.ConvectronPressureValue)
                 self.ConvectronPressure['text'] = str(self.ConvectronPressureValue)
 
+                self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
+                print(self.BaratronPressureValue)
+                self.BaratronPressureList.append(self.BaratronPressureValue)
+                self.BaratronPressure['text'] = str(self.BaratronPressureValue)
+
+                self.IonGaugePressureValue = IonGaugePressure(self.LJ, 4)
+                self.IonGaugePressureList.append(self.IonGaugePressureValue)
+                self.IonGaugePressure['text'] = str(self.IonGaugePressureValue)
+
                 self.plot1.remove()
                 self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
                 self.plot1.plot(self.timelist, self.GoldProbeTempList, color='orange')
@@ -245,7 +269,7 @@ class controller(tk.Tk):
 
     def choosefile(self):
         self.totallist = []
-        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature', 'Convectron Pressure']
+        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature', 'Convectron Pressure', 'Baratron Pressure', 'Ion Gauge Pressure']
         self.file = tkfd.asksaveasfilename(
             parent=self, initialdir='.',
             title='Choose File',
@@ -255,7 +279,7 @@ class controller(tk.Tk):
             ])
         print(os.path.basename(self.file))
         for i in range(len(self.list)):
-            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i]]
+            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i]]
             self.totallist.append(newentry)
 
         with open(self.file, 'w') as savefile:
