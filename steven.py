@@ -47,7 +47,8 @@ class controller(tk.Tk):
         s.configure('.', font=('Cambria'), fontsize=16)
         s.configure('TButton')
         self.grid_rowconfigure(0,w=1)
-        self.grid_columnconfigure(0,w=1)
+        self.grid_columnconfigure(1,w=1)
+
 
         self.LJ = u6.U6()
 
@@ -64,8 +65,10 @@ class controller(tk.Tk):
         self.frame1 = ttk.Frame(self)
         self.frame1.grid(column=0, row=0, sticky='news')
 
+
         self.notebook = ttk.Notebook(self)
         self.notebook.grid(column=1, row=0, sticky='news')
+
 
         self.frame2 = ttk.Frame(self.notebook)
         self.notebook.add(self.frame2, text='Temperatures')
@@ -101,42 +104,43 @@ class controller(tk.Tk):
         self.canvas2.get_tk_widget().pack(side='top', fill='both', expand=1)
 
         self.RadicalDensityLabel = ttk.Label(self.frame1, text='Radical Density')
-        self.RadicalDensityLabel.grid(row=0,columnspan=2)
+        self.RadicalDensityLabel.grid(row=0,column=0, columnspan=2, sticky='ew')
 
         self.RadicalDensity = ttk.Label(self.frame1, text='0.00')
-        self.RadicalDensity.grid(row=1, columnspan=2)
+        self.RadicalDensity.grid(row=0,column=1, sticky='ew')
 
         self.StartScan = ttk.Button(self.frame3, text='Start Scan', command=self.startscan)
-        self.StartScan.grid(row=0, columnspan=2, sticky='ew')
+        self.StartScan.grid(row=0, sticky='ew')
 
         self.StopScan = ttk.Button(self.frame3, text='Stop Scan', command=self.stopscan)
-        self.StopScan.grid(row=1, columnspan=2, sticky='ew')
+        self.StopScan.grid(row=1, sticky='ew')
+        self.StopScan.grid_forget()
 
         self.GoldProbeLabel = ttk.Label(self.frame1, text='Gold Probe (deg C):')
-        self.GoldProbeLabel.grid(row=2, columnspan=2, sticky='ew')
+        self.GoldProbeLabel.grid(row=1, sticky='ew')
 
         self.GoldProbe = ttk.Label(self.frame1, text='0.00')
-        self.GoldProbe.grid(row=3, columnspan=2, sticky='ew')
+        self.GoldProbe.grid(row=1, column=1,sticky='ew')
 
         self.SSProbeLabel = ttk.Label(self.frame1, text='SS Probe (deg C):')
-        self.SSProbeLabel.grid(row=4, columnspan=2, sticky='ew')
+        self.SSProbeLabel.grid(row=2, sticky='ew')
 
         self.SSProbe = ttk.Label(self.frame1, text='0.00')
-        self.SSProbe.grid(row=5, columnspan=2, sticky='ew')
+        self.SSProbe.grid(row=2, column=1,sticky='ew')
 
         self.DifferenceLabel = ttk.Label(self.frame1, text = 'Difference (deg C):')
-        self.DifferenceLabel.grid(row=6, columnspan=2, sticky='ew')
+        self.DifferenceLabel.grid(row=3, sticky='ew')
 
         self.Difference = ttk.Label(self.frame1, text = '0.00')
-        self.Difference.grid(row=7, columnspan=2, sticky='ew')
+        self.Difference.grid(row=3,column=1, sticky='ew')
 
-        self.ExportData = ttk.Button(self.frame3, text='Export Data', command=self.choosefile)
-        self.ExportData.grid()
-        self.ExportData.grid_forget()
+        self.ExportData = ttk.Button(self.frame3, text='Export Data', command=self.choosefile, state=tk.DISABLED)
+        self.ExportData.grid(row=11,columnspan=2,sticky='ew')
+#        self.ExportData.grid_forget()
 
-        self.ResetPlot = ttk.Button(self.frame3, text='Reset Plot', command=self.reset)
-        self.ResetPlot.grid()
-        self.ResetPlot.grid_forget()
+        self.ResetPlot = ttk.Button(self.frame3, text='Reset Plot', command=self.reset, state=tk.DISABLED)
+        self.ResetPlot.grid(row=12,columnspan=2,sticky='ew')
+#        self.ResetPlot.grid_forget()
 
     #    self.ConductivityLabel = ttk.Label(self.frame1, text='SS Conductivity')
     #    self.ConductivityLabel.grid(row=8, columnspan=2, sticky='ew')
@@ -145,34 +149,34 @@ class controller(tk.Tk):
     #    self.Conductivity.grid(row=9, columnspan=2, sticky='ew')
 
         self.ConvectronPressureLabel = ttk.Label(self.frame1, text='Convectron Pressure (Torr)')
-        self.ConvectronPressureLabel.grid(row=10, columnspan=2, sticky='ew')
+        self.ConvectronPressureLabel.grid(row=4, column=0,sticky='ew')
 
         self.ConvectronPressure = ttk.Label(self.frame1, text='0.00')
-        self.ConvectronPressure.grid(row=11,columnspan=2,sticky='ew')
+        self.ConvectronPressure.grid(row=4,column=1,sticky='ew')
 
         self.BaratronPressureLabel = ttk.Label(self.frame1, text='Baratron Pressure (Torr)')
-        self.BaratronPressureLabel.grid(row=12,columnspan=2,sticky='ew')
+        self.BaratronPressureLabel.grid(row=5,sticky='ew')
 
         self.BaratronPressure = ttk.Label(self.frame1, text='0.00')
-        self.BaratronPressure.grid(row=13,columnspan=2,sticky='ew')
+        self.BaratronPressure.grid(row=5,column=1,sticky='ew')
 
         self.IonGaugePressureLabel = ttk.Label(self.frame1, text='Ion Gauge Pressure')
-        self.IonGaugePressureLabel.grid(row=14, columnspan=2,sticky='ew')
+        self.IonGaugePressureLabel.grid(row=6,sticky='ew')
 
         self.IonGaugePressure = ttk.Label(self.frame1, text='0.00')
-        self.IonGaugePressure.grid(row=15,columnspan=2,sticky='ew')
+        self.IonGaugePressure.grid(row=6,column=1,columnspan=2,sticky='ew')
 
         self.PlasmaPowerLabel = ttk.Label(self.frame1, text='Plasma Power')
-        self.PlasmaPowerLabel.grid(row=16, columnspan=2,sticky='ew')
+        self.PlasmaPowerLabel.grid(row=7,sticky='ew')
 
         self.PlasmaPower = ttk.Label(self.frame1, text='0.00')
-        self.PlasmaPower.grid(row=17,columnspan=2,sticky='ew')
+        self.PlasmaPower.grid(row=7,column=1,sticky='ew')
 
         self.FlowRateLabel = ttk.Label(self.frame1, text='Flow Rate')
-        self.FlowRateLabel.grid(row=18, columnspan=2,sticky='ew')
+        self.FlowRateLabel.grid(row=8,sticky='ew')
 
         self.FlowRate = ttk.Label(self.frame1, text='0.00')
-        self.FlowRate.grid(row=19,columnspan=2,sticky='ew')
+        self.FlowRate.grid(row=8,column=1,sticky='ew')
 
         self.PowerEntry = tk.Entry(self.frame3)
         self.PowerEntry.grid(row=6, columnspan=2,sticky='ew')
@@ -206,6 +210,8 @@ class controller(tk.Tk):
         else:
             global running
             running = True
+            self.StartScan.grid_forget()
+            self.StopScan.grid(row=1, columnspan=2,sticky='ew')
 
     def stopscan(self):
         global running
@@ -216,6 +222,10 @@ class controller(tk.Tk):
         self.PowerEntryButton.grid_forget()
         self.FlowRateEntry.grid_forget()
         self.FlowRateEntryButton.grid_forget()
+        self.StopScan.grid_forget()
+        self.StartScan.grid(row=0, columnspan=2, sticky='ew')
+        self.ExportData['state']='normal'
+        self.ResetPlot['state']='normal'
 
     def logpower(self):
         self.plasmapower = self.PowerEntry.get()
@@ -266,7 +276,7 @@ class controller(tk.Tk):
 
                 self.ConvectronPressureValue = ConvectronPressure(self.LJ, 2)
                 self.ConvectronPressureList.append(self.ConvectronPressureValue)
-                self.ConvectronPressure['text'] = str(self.ConvectronPressureValue)
+                self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
 
                 self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
                 self.BaratronPressureList.append(self.BaratronPressureValue)
@@ -342,6 +352,16 @@ class controller(tk.Tk):
 
     def reset(self):
         self.list.clear()
+        self.timelist.clear()
+        self.GoldProbeTempList.clear()
+        self.SSProbeTempList.clear()
+        self.PlasmaPowerList.clear()
+        self.FlowRateList.clear()
+        self.ConvectronPressureList.clear()
+        self.BaratronPressureList.clear()
+        self.IonGaugePressureList.clear()
+
+        print(self.list)
 
 
 
