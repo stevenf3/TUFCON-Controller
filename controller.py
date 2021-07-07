@@ -355,7 +355,6 @@ class controller(tk.Tk):
             self.canvas2.draw()
             self.canvas3.draw()
             self.DarkModeButton['text'] = 'Light Mode'
-file:///tmp/mozilla_fusion0/get-pip.py
         elif self.DarkModeButton['text'] == 'Light Mode':
             self.s.configure('TFrame', background='gray82')
             self.s.configure('TLabel', background='gray82', foreground='black')
