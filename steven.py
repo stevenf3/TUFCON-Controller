@@ -60,7 +60,7 @@ class controller(tk.Tk):
         self.tkintercolorlist = tkintercolorlist()
         self.rgbvalue = 0
 
-    #    self.LJ = u6.U6()
+        self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -292,7 +292,7 @@ class controller(tk.Tk):
             self.StopScan.grid(row=0, columnspan=2,sticky='ew')
             self.PowerEntry.grid(row=6, columnspan=2,sticky='ew')
             self.PowerEntryButton.grid(row=7,columnspan=2,sticky='ew')
-            self.FlowrateEntry.grid(row=8, columnspan=2,sticky='ew')
+            self.FlowRateEntry.grid(row=8, columnspan=2,sticky='ew')
             self.FlowRateEntryButton.grid(row=9,columnspan=2,sticky='ew')
             self.ExportData['state']=tk.DISABLED
             self.ResetPlot['state']=tk.DISABLED
@@ -300,7 +300,7 @@ class controller(tk.Tk):
     def stopscan(self):
         global running
         running = False
-        self.ExportData.grid(row=2, columnspan=2, sticky='ew')
+        self.ExportData.grid(row=14, columnspan=2, sticky='ew')
         self.ResetPlot.grid(row=15, columnspan=2, sticky='ew')
         self.PowerEntry.grid_forget()
         self.PowerEntryButton.grid_forget()
