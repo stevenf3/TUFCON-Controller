@@ -16,8 +16,10 @@ import math
 from Gauges import *
 import matplotlib.colors
 from tkintercolorlist import *
+import random
 
 running = False
+rgbon = False
 WD = 7.18 * (10**-19) ##J/molecule, dissociation energy
 L = 6.35 * (10**-3) ##m length of exposed probe
 D = 0.508 * (10**-3) ##m (diameter of probe)
@@ -56,8 +58,9 @@ class controller(tk.Tk):
             self.matplotcolorlist.append(name[0])
 
         self.tkintercolorlist = tkintercolorlist()
+        self.rgbvalue = 0
 
-        self.LJ = u6.U6()
+    #    self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -130,7 +133,6 @@ class controller(tk.Tk):
         self.canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
         self.canvas2.get_tk_widget().pack(side='top', fill='both', expand=1)
         self.canvas3.get_tk_widget().pack(side='top',fill='both',expand=1)
-        print('Running')
 
         self.toolbar1 = NavigationToolbar2Tk(self.canvas, self.frame2)
         self.toolbar1.update()
@@ -177,17 +179,11 @@ class controller(tk.Tk):
         self.ResetPlot = ttk.Button(self.frame3, text='Reset Plot', command=self.reset, state=tk.DISABLED)
         self.ResetPlot.grid(row=12,columnspan=2,sticky='ew')
 
-
-
         self.DarkModeButton = ttk.Button(self.frame2s, text='Dark Mode', command=self.darkmode)
-        self.DarkModeButton.grid(row=0, columnspan=3, sticky='ew')
-#        self.ResetPlot.grid_forget()
+        self.DarkModeButton.grid(row=0, columnspan=2, sticky='ew')
 
-    #    self.ConductivityLabel = ttk.Label(self.frame1, text='SS Conductivity')
-    #    self.ConductivityLabel.grid(row=8, columnspan=2, sticky='ew')
-
-    #    self.Conductivity = ttk.Label(self.frame1, text='0.00')
-    #    self.Conductivity.grid(row=9, columnspan=2, sticky='ew')
+        self.RGBButton = ttk.Button(self.frame2s, text='Gamer Mode', command=self.startrgb)
+        self.RGBButton.grid(row=0, column=2, columnspan=2,sticky='ew')
 
         self.ConvectronPressureLabel = ttk.Label(self.frame1, text='Convectron Pressure (Torr):')
         self.ConvectronPressureLabel.grid(row=4, column=0,sticky='ew')
@@ -293,7 +289,13 @@ class controller(tk.Tk):
             global running
             running = True
             self.StartScan.grid_forget()
-            self.StopScan.grid(row=1, columnspan=2,sticky='ew')
+            self.StopScan.grid(row=0, columnspan=2,sticky='ew')
+            self.PowerEntry.grid(row=6, columnspan=2,sticky='ew')
+            self.PowerEntryButton.grid(row=7,columnspan=2,sticky='ew')
+            self.FlowrateEntry.grid(row=8, columnspan=2,sticky='ew')
+            self.FlowRateEntryButton.grid(row=9,columnspan=2,sticky='ew')
+            self.ExportData['state']=tk.DISABLED
+            self.ResetPlot['state']=tk.DISABLED
 
     def stopscan(self):
         global running
@@ -343,7 +345,7 @@ class controller(tk.Tk):
         if self.DarkModeButton['text'] == 'Dark Mode':
             self.s.configure('TFrame', background='gray23')
             self.s.configure('TLabel', background='gray23', foreground='gainsboro')
-            self.s.configure('TButton', background='gray26', foreground='gainsboro')
+            self.s.configure('TButton', background='gray26', foreground='black')
             self.s.configure('TEntry', background='gray40', foreground='black')
             self.s.configure('TNotebook', background='gray23', foreground='gray23')
             self.fig1.set_facecolor('darkgray')
@@ -369,6 +371,38 @@ class controller(tk.Tk):
             self.DarkModeButton['text'] = 'Dark Mode'
             #for label in self.LabelList:
             #    label['background']='gray23'
+
+    def startrgb(self):
+        global rgbon
+        if self.rgbvalue == 0:
+            self.rgbvalue = 1
+            rgbon = True
+
+        elif self.rgbvalue == 1:
+            self.rgbvalue = 0
+            rgbon = False
+
+
+    def rgbmode(self):
+        if rgbon:
+            self.randombg = random.choice(self.tkintercolorlist)
+            self.randomtxt = random.choice(self.tkintercolorlist)
+            self.randomfigcolor = random.choice(self.matplotcolorlist)
+
+            self.s.configure('TFrame', background=self.randombg)
+            self.s.configure('TLabel', background=self.randombg, foreground=self.randomtxt)
+            self.s.configure('TButton', background=self.randombg, foreground=self.randomtxt)
+            self.s.configure('TEntry', background=self.randombg, foreground=self.randomtxt)
+            self.s.configure('TNotebook', background=self.randombg, foreground=self.randomtxt)
+            self.fig1.set_facecolor(self.randomfigcolor)
+            self.fig2.set_facecolor(self.randomfigcolor)
+            self.fig3.set_facecolor(self.randomfigcolor)
+            self.canvas.draw()
+            self.canvas2.draw()
+            self.canvas3.draw()
+
+        self.after(500, self.rgbmode)
+
     def scanning(self):
         with open('temps.txt','a') as temptxt:
             if running:
@@ -533,4 +567,5 @@ if __name__ == '__main__':
     app = controller()
     app.wm_title('TUFCON Controller')
     app.after(1000, app.scanning)
+    app.after(1000, app.rgbmode)
     app.mainloop()
