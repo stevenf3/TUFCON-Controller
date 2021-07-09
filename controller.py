@@ -151,7 +151,7 @@ class controller(tk.Tk):
         self.toolbar3 = NavigationToolbar2Tk(self.canvas3, self.frame2c)
         self.toolbar3.update()
 
-        self.RadicalDensityLabel = ttk.Label(self.frame1, text='Radical Density')
+        self.RadicalDensityLabel = ttk.Label(self.frame1, text='Radical Density (n/m3)')
         self.RadicalDensityLabel.grid(row=0,column=0, columnspan=2, sticky='ew')
 
         self.RadicalDensity = ttk.Label(self.frame1, text='0.00')
@@ -213,13 +213,13 @@ class controller(tk.Tk):
         self.IonGaugePressure = ttk.Label(self.frame1, text='0.00')
         self.IonGaugePressure.grid(row=6,column=1,columnspan=2,sticky='ew')
 
-        self.PlasmaPowerLabel = ttk.Label(self.frame1, text='Plasma Power')
+        self.PlasmaPowerLabel = ttk.Label(self.frame1, text='Plasma Power (W)')
         self.PlasmaPowerLabel.grid(row=7,sticky='ew')
 
         self.PlasmaPower = ttk.Label(self.frame1, text='0.00')
         self.PlasmaPower.grid(row=7,column=1,sticky='ew')
 
-        self.FlowRateLabel = ttk.Label(self.frame1, text='Flow Rate')
+        self.FlowRateLabel = ttk.Label(self.frame1, text='Flow Rate (sccm)')
         self.FlowRateLabel.grid(row=8,sticky='ew')
 
         self.FlowRate = ttk.Label(self.frame1, text='0.00')
@@ -462,20 +462,21 @@ class controller(tk.Tk):
 
                 self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
                 self.BaratronPressureList.append(self.BaratronPressureValue)
-                self.BaratronPressure['text'] = str(self.BaratronPressureValue)
+                self.BaratronPressure['text'] = "{:0.3e}".format(self.BaratronPressureValue)
 
                 self.IonGaugePressureValue = IonGaugePressure(self.LJ, 4)
                 if type(self.IonGaugePressureValue) == 'string':
                     self.IonGaugePressureList.append(np.nan)
                 else:
                     self.IonGaugePressureList.append(self.IonGaugePressureValue)
-                self.IonGaugePressure['text'] = str(self.IonGaugePressureValue)
+                self.IonGaugePressure['text'] = "{:0.3e}".format(self.IonGaugePressureValue)
 
 
                 self.plot1.remove()
                 self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
                 self.plot1.set_xlabel('Time (s)')
                 self.plot1.set_ylabel('Temperature (deg C)')
+                self.plot1.set_title('Temperature(deg C)')
                 self.plot1.plot(self.timelist, self.GoldProbeTempList, color='orange')
                 self.plot1.plot(self.timelist, self.SSProbeTempList, color='blue')
 
@@ -484,6 +485,7 @@ class controller(tk.Tk):
                 self.plot2 = self.fig1.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(0, self.maxlim2))
                 self.plot2.set_xlabel('Time (s)')
                 self.plot2.set_ylabel('Temperature (deg C)')
+                self.plot2.set_title('Temperature(deg C)')
                 self.plot2.plot(self.timelist[-60:], self.GoldProbeTempList[-60:], color='orange')
                 self.plot2.plot(self.timelist[-60:], self.SSProbeTempList[-60:], color='blue')
 
@@ -494,6 +496,7 @@ class controller(tk.Tk):
                 self.plot3.set_xlabel('Time (s)')
                 self.plot3.set_ylabel('Radical Density')
                 self.plot3.set_yscale('log')
+                self.plot3.set_title('Radical Density')
                 self.plot3.plot(self.timelist, self.RadicalDensityList, color='green')
 
                 self.plot4.remove()
@@ -501,6 +504,7 @@ class controller(tk.Tk):
                 self.plot4.set_xlabel('Time (s)')
                 self.plot4.set_ylabel('Radical Density')
                 self.plot4.set_yscale('log')
+                self.plot4.set_title('Radical Density (n/m3)')
                 self.plot4.plot(self.timelist[-60:], self.RadicalDensityList[-60:], color='red')
 
 
@@ -511,6 +515,7 @@ class controller(tk.Tk):
                 self.plot5.set_xlabel('Time (s)')
                 self.plot5.set_ylabel('Pressure (Torr)')
                 self.plot5.set_yscale('log')
+                self.plot5.set_title('Pressure')
                 self.plot5.plot(self.timelist, self.ConvectronPressureList, color='purple')
                 self.plot5.plot(self.timelist, self.BaratronPressureList, color='blue')
                 for pressure in self.IonGaugePressureList:
@@ -522,6 +527,7 @@ class controller(tk.Tk):
                 self.plot6.set_xlabel('Time (s)')
                 self.plot6.set_ylabel('Pressure (Torr)')
                 self.plot6.set_yscale('log')
+                self.plot6.set_title('Pressure')
                 self.plot6.plot(self.timelist[-60:], self.ConvectronPressureList[-60:], color='gold')
                 self.canvas3.draw()
 
@@ -546,7 +552,7 @@ class controller(tk.Tk):
 
     def choosefile(self):
         self.totallist = []
-        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature', 'Convectron Pressure', 'Baratron Pressure', 'Ion Gauge Pressure', 'Plasma Power', 'Flow Rate']
+        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature', 'Radical Density' 'Convectron Pressure', 'Baratron Pressure', 'Ion Gauge Pressure', 'Plasma Power', 'Flow Rate']
         self.file = tkfd.asksaveasfilename(
             parent=self, initialdir='.',
             title='Choose File',

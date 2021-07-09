@@ -44,7 +44,8 @@ class controller(tk.Tk):
         self.colorlist = list(self.red.range_to(Color('blue'),65))
         self.colorlistBR = list(self.blue.range_to(Color('red'),65))
 
-        self.colorlist.append(self.colorlistBR[0])
+        self.colorlist.extend(self.colorlistBR)
+        print(len(self.colorlist))
 
         self.list =[]
         self.timelist = []
@@ -70,6 +71,7 @@ class controller(tk.Tk):
 
         #self.LJ = u6.U6()
 
+        self.colorlistcount = 0
         self.maxlim1 = 40
         self.maxlim2 = 40
         self.maxlim3 = 2* 10**15
@@ -361,6 +363,7 @@ class controller(tk.Tk):
             self.canvas2.draw()
             self.canvas3.draw()
             self.DarkModeButton['text'] = 'Light Mode'
+
         elif self.DarkModeButton['text'] == 'Light Mode':
             self.s.configure('TFrame', background='gray82')
             self.s.configure('TLabel', background='gray82', foreground='black')
@@ -520,6 +523,18 @@ class controller(tk.Tk):
                 self.plot6.plot(self.timelist[-60:], self.ConvectronPressureList[-60:], color='gold')
                 self.canvas3.draw()
 
+                self.fig1.set_facecolor(self.colorlist[self.colorlistcount])
+                self.fig2.set_facecolor(self.colorlist[self.colorlistcount])
+                self.fig3.set_facecolor(self.colorlist[self.colorlistcount])
+
+                self.colorlistcount += 1
+                
+                if self.colorlistcount == 131:
+                    self.colorlistcount = 0
+
+                self.canvas.draw()
+                self.canvas2.draw()
+                self.canvas3.draw()
 
 
 
