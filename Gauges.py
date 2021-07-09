@@ -27,7 +27,7 @@ def BaratronPressure(d, AIN):
 def IonGaugePressure(d, AIN):
     voltage = (GaugeVoltage(d, AIN))
     if voltage <= 1:
-        return('over range')
+        return('Ion Gauge Off')
     else:
         power = -1 * math.floor(voltage)
         mantissa = 1 - (voltage - math.floor(voltage))
