@@ -496,7 +496,7 @@ class controller(tk.Tk):
                 self.canvas.draw()
 
                 self.plot3.remove()
-                self.plot3 = self.fig2.add_subplot(211, ylim=(1,self.maxlim3),yscale='log')
+                self.plot3 = self.fig2.add_subplot(211, ylim=(1e19,self.maxlim3),yscale='log')
                 self.plot3.set_xlabel('Time (s)')
                 self.plot3.set_ylabel('Radical Density')
                 #self.plot3.set_yscale('log')
@@ -504,7 +504,7 @@ class controller(tk.Tk):
                 self.plot3.plot(self.timelist, self.RadicalDensityList, color='green')
 
                 self.plot4.remove()
-                self.plot4 = self.fig2.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(1,self.maxlim4),yscale='log')
+                self.plot4 = self.fig2.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(1e19,self.maxlim4),yscale='log')
                 self.plot4.set_xlabel('Time (s)')
                 self.plot4.set_ylabel('Radical Density')
                 #self.plot4.set_yscale('log')
