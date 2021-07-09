@@ -17,7 +17,7 @@ from Gauges import *
 import matplotlib.colors
 from tkintercolorlist import *
 import random
-from colour import Color
+#from colour import Color
 
 running = False
 rgbon = False
@@ -450,26 +450,30 @@ class controller(tk.Tk):
                 self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
                 self.RadicalDensity['text'] = "{:0.3e}".format(self.RadicalDensityValue)
                 self.RadicalDensityList.append(self.RadicalDensityValue)
-                self.maxlim3 = 1.25 * max(self.RadicalDensityList)
+                self.maxlim3 = 10 * max(self.RadicalDensityList)
                 self.Radical60 = self.RadicalDensityList[-60:]
-                self.maxlim4 = 1.25 * max(self.Radical60)
+                self.maxlim4 = 10 * max(self.Radical60)
 
                 self.ConvectronPressureValue = ConvectronPressure(self.LJ, 2)
                 self.ConvectronPressureList.append(self.ConvectronPressureValue)
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
-                self.pressureylim1 = 1.25 * max(self.ConvectronPressureList)
-                self.pressureylim2 = 1.25 * max(self.ConvectronPressureList[-60:])
+                self.pressureylim1 = 10 * max(self.ConvectronPressureList)
+                self.pressureylim2 = 10 * max(self.ConvectronPressureList[-60:])
 
                 self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
                 self.BaratronPressureList.append(self.BaratronPressureValue)
                 self.BaratronPressure['text'] = "{:0.3e}".format(self.BaratronPressureValue)
 
                 self.IonGaugePressureValue = IonGaugePressure(self.LJ, 4)
-                if type(self.IonGaugePressureValue) == 'string':
+                if self.IonGaugePressureValue == 'Ion Gauge Off':
                     self.IonGaugePressureList.append(np.nan)
+                    self.IonGaugePressure['text'] = 'Ion Gauge Off'
                 else:
                     self.IonGaugePressureList.append(self.IonGaugePressureValue)
-                self.IonGaugePressure['text'] = "{:0.3e}".format(self.IonGaugePressureValue)
+                    try:
+                        self.IonGaugePressure['text'] = "{:0.3e}".format(self.IonGaugePressureValue)
+                    except:
+                        self.IonGaugePressure['text'] = str(self.IonGaugePressureValue)
 
 
                 self.plot1.remove()
@@ -492,18 +496,18 @@ class controller(tk.Tk):
                 self.canvas.draw()
 
                 self.plot3.remove()
-                self.plot3 = self.fig2.add_subplot(211, ylim=(0,self.maxlim3))
+                self.plot3 = self.fig2.add_subplot(211, ylim=(1,self.maxlim3),yscale='log')
                 self.plot3.set_xlabel('Time (s)')
                 self.plot3.set_ylabel('Radical Density')
-                self.plot3.set_yscale('log')
+                #self.plot3.set_yscale('log')
                 self.plot3.set_title('Radical Density')
                 self.plot3.plot(self.timelist, self.RadicalDensityList, color='green')
 
                 self.plot4.remove()
-                self.plot4 = self.fig2.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(0,self.maxlim4))
+                self.plot4 = self.fig2.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(1,self.maxlim4),yscale='log')
                 self.plot4.set_xlabel('Time (s)')
                 self.plot4.set_ylabel('Radical Density')
-                self.plot4.set_yscale('log')
+                #self.plot4.set_yscale('log')
                 self.plot4.set_title('Radical Density (n/m3)')
                 self.plot4.plot(self.timelist[-60:], self.RadicalDensityList[-60:], color='red')
 
@@ -511,22 +515,22 @@ class controller(tk.Tk):
                 self.canvas2.draw()
 
                 self.plot5.remove()
-                self.plot5 = self.fig3.add_subplot(211, ylim=(0,self.pressureylim1))
+                self.plot5 = self.fig3.add_subplot(211, ylim=(1e-6,self.pressureylim1))
                 self.plot5.set_xlabel('Time (s)')
                 self.plot5.set_ylabel('Pressure (Torr)')
-                self.plot5.set_yscale('log')
+                #self.plot5.set_yscale('log')
                 self.plot5.set_title('Pressure')
                 self.plot5.plot(self.timelist, self.ConvectronPressureList, color='purple')
                 self.plot5.plot(self.timelist, self.BaratronPressureList, color='blue')
                 for pressure in self.IonGaugePressureList:
-                    self.plot5.plot(self.timelist, self.IonGaugePressureList, color='xkcd:baby shit brown')
+                    self.plot5.plot(self.timelist, self.IonGaugePressureList, color='green')
 
 
                 self.plot6.remove()
-                self.plot6 = self.fig3.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(0,self.pressureylim2))
+                self.plot6 = self.fig3.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(1e-6,self.pressureylim2),yscale='log')
                 self.plot6.set_xlabel('Time (s)')
                 self.plot6.set_ylabel('Pressure (Torr)')
-                self.plot6.set_yscale('log')
+            #    self.plot6.set_yscale('log')
                 self.plot6.set_title('Pressure')
                 self.plot6.plot(self.timelist[-60:], self.ConvectronPressureList[-60:], color='gold')
                 self.canvas3.draw()
