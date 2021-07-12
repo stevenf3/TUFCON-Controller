@@ -67,7 +67,7 @@ class controller(tk.Tk):
         self.tkintercolorlist = tkintercolorlist()
         self.rgbvalue = 0
 
-        self.LJ = u6.U6()
+        #self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -414,15 +414,16 @@ class controller(tk.Tk):
     def scanning(self):
         with open('temps.txt','a') as temptxt:
             if running:
-                self.list.append(RadicalTemps(self.LJ, 0, 1))
-                self.timelist.append(len(self.list))
+                self.temperatures = RadicalTemps(self.LJ, 0, 1)
+                np.append(self.list, self.temperatures)
+                np.append(self.timelist, len(self.list))
                 self.GoldProbeTemp = round(self.list[-1][0], 3)
                 self.SSProbeTemp = round(self.list[-1][1], 3)
                 self.DifferenceTemp = round((self.GoldProbeTemp - self.SSProbeTemp), 3)
-                self.GoldProbeTempList.append(self.GoldProbeTemp)
-                self.SSProbeTempList.append(self.SSProbeTemp)
-                self.PlasmaPowerList.append(self.plasmapower)
-                self.FlowRateList.append(self.flowrate)
+                np.append(self.GoldProbeTempList, self.GoldProbeTemp)
+                np.append(self.SSProbeTempList, self.SSProbeTemp)
+                np.append(self.PlasmaPowerList, self.plasmapower)
+                np.append(self.FlowRateList, self.flowrate)
 
                 self.GoldProbe['text'] = str(self.GoldProbeTemp)
                 self.SSProbe['text'] = str(self.SSProbeTemp)
@@ -447,27 +448,27 @@ class controller(tk.Tk):
 
                 self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
                 self.RadicalDensity['text'] = "{:0.3e}".format(self.RadicalDensityValue)
-                self.RadicalDensityList.append(self.RadicalDensityValue)
+                np.append(self.RadicalDensityList, self.RadicalDensityValue)
                 self.maxlim3 = 10 * max(self.RadicalDensityList)
                 self.Radical60 = self.RadicalDensityList[-60:]
                 self.maxlim4 = 10 * max(self.Radical60)
 
                 self.ConvectronPressureValue = CorrectedConvectronPressure(self.LJ, 2)
-                self.ConvectronPressureList.append(self.ConvectronPressureValue)
+                np.append(self.ConvectronPressureList, self.ConvectronPressureValue)
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
                 self.pressureylim1 = 10 * max(self.ConvectronPressureList)
                 self.pressureylim2 = 10 * max(self.ConvectronPressureList[-60:])
 
                 self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
-                self.BaratronPressureList.append(self.BaratronPressureValue)
+                np.append(self.BaratronPressureList, self.BaratronPressureValue)
                 self.BaratronPressure['text'] = "{:0.3e}".format(self.BaratronPressureValue)
 
                 self.IonGaugePressureValue = IonGaugePressure(self.LJ, 4)
                 if self.IonGaugePressureValue == 'Ion Gauge Off':
-                    self.IonGaugePressureList.append(np.nan)
+                    np.append(self.IonGaugePressureList, np.nan)
                     self.IonGaugePressure['text'] = 'Ion Gauge Off'
                 else:
-                    self.IonGaugePressureList.append(self.IonGaugePressureValue)
+                    np.append(self.IonGaugePressureList, self.IonGaugePressureValue)
                     try:
                         self.IonGaugePressure['text'] = "{:0.3e}".format(self.IonGaugePressureValue)
                     except:
