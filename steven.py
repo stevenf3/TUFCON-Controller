@@ -32,6 +32,7 @@ GammaGold = 0.115
 GammaSS = 0.100
 
 color = 'empty'
+
 class controller(tk.Tk):
     def __init__(self):
         super().__init__()

@@ -44,24 +44,17 @@ class controller(tk.Tk):
         self.plasmapower = 'None Logged'
         self.flowrate = 'None Logged'
 
-        #self.red = Color('red')
-        #self.blue = Color('blue')
-        #self.colorlist = list(self.red.range_to(Color('blue'),65))
-        #self.colorlistBR = list(self.blue.range_to(Color('red'),65))
+        self.list = np.array([])
+        self.timelist = np.array([])
+        self.GoldProbeTempList = np.array([])
+        self.SSProbeTempList = np.array([])
+        self.RadicalDensityList = np.array([])
+        self.ConvectronPressureList = np.array([])
+        self.BaratronPressureList = np.array([])
+        self.IonGaugePressureList = np.array([])
+        self.PlasmaPowerList = np.array([])
+        self.FlowRateList = np.array([])
 
-        #self.colorlist.append(self.colorlistBR[0])
-        #print(self.colorlist)
-
-        self.list =[]
-        self.timelist = []
-        self.GoldProbeTempList = []
-        self.SSProbeTempList = []
-        self.RadicalDensityList = []
-        self.ConvectronPressureList = []
-        self.BaratronPressureList = []
-        self.IonGaugePressureList = []
-        self.PlasmaPowerList = []
-        self.FlowRateList = []
         self.s = ttk.Style()
         self.s.configure('.', font=('Cambria'), fontsize=16)
         self.s.configure('TButton')
@@ -74,7 +67,7 @@ class controller(tk.Tk):
         self.tkintercolorlist = tkintercolorlist()
         self.rgbvalue = 0
 
-    #    self.LJ = u6.U6()
+        self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
