@@ -16,6 +16,12 @@ def ConvectronPressure(d, AIN):
     pressure = 10**voltagepower
     return(pressure)
 
+def CorrectedConvectronPressure(d, AIN):
+    x = ConvectronPressure(d, AIN)
+    CorrectedPressure = 0.0318*x**4 - 0.3553*x**3 + 1.3606*x**2 - 1.0397*x + 1.0223
+    return(CorrectedPressure)
+
+
 def BaratronPressure(d, AIN):
     voltage = (GaugeVoltage(d, AIN))
     if voltage >= 10:
