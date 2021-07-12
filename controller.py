@@ -32,6 +32,11 @@ GammaGold = 0.115
 GammaSS = 0.100
 
 color = 'empty'
+
+def ConvectronConversion(x):
+    y = 0.06478 * x**3 - 0.5328*x**2 + 1.3905*x - 1.0742
+    return(y)
+
 class controller(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -69,7 +74,7 @@ class controller(tk.Tk):
         self.tkintercolorlist = tkintercolorlist()
         self.rgbvalue = 0
 
-        self.LJ = u6.U6()
+    #    self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -454,7 +459,7 @@ class controller(tk.Tk):
                 self.Radical60 = self.RadicalDensityList[-60:]
                 self.maxlim4 = 10 * max(self.Radical60)
 
-                self.ConvectronPressureValue = ConvectronPressure(self.LJ, 2)
+                self.ConvectronPressureValue = CorrectedConvectronPressure(self.LJ, 2)
                 self.ConvectronPressureList.append(self.ConvectronPressureValue)
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
                 self.pressureylim1 = 10 * max(self.ConvectronPressureList)
@@ -589,10 +594,6 @@ class controller(tk.Tk):
         self.IonGaugePressureList.clear()
 
         print(self.list)
-
-
-
-
 
 if __name__ == '__main__':
     app = controller()
