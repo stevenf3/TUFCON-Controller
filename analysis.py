@@ -4,7 +4,7 @@ import csv
 import pandas as pd
 from scipy.signal import savgol_filter
 
-filename = '070921-20mT.csv'
+filename = '070921-60mTorr.csv'
 powers = [200, 400, 600, 800, 1000]
 df = pd.read_csv(filename)
 #df.plot('Time', 'Radical Density', logy=True, ylim=(1e19, 1e21))
@@ -18,9 +18,9 @@ ax.plot(timelist, RadList, label='Radical Density (n/m3)')
 ax.set_xlabel('Time (s, approximate)')
 ax.set_ylabel('Radical Density (n/m3)')
 ax.set_yscale('log')
-ax.set_ylim([5e19, 3e21])
+ax.set_ylim([7e19, 3e21])
 
-ax.set_title('Radical Density vs Time (20 mTorr)')
+ax.set_title('Radical Density vs Time (60 mTorr)')
 
 AvgList = []
 firstatavg = []
@@ -28,7 +28,7 @@ changeslist = []
 for power in powers:
     change = timelist[PowerList.index(power)]
     changeslist.append(change)
-    ax.vlines(change, ymin=5e19, ymax=3e21)
+    ax.vlines(change, ymin=7e19, ymax=3e21)
 
 
     if power != 1000:
@@ -83,7 +83,7 @@ for i in range(len(firstatavg)):
     print(timeto)
 
 
-writerfile = '070921-20mT-Analyzed'
+writerfile = '070921-60mT-Analyzed'
 csvheader = ['Pressure', 'Power', 'Equilibrium Radical Density', 'Time to Equilibrium' ]
 
 totallist = []
