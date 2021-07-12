@@ -67,7 +67,7 @@ class controller(tk.Tk):
         self.tkintercolorlist = tkintercolorlist()
         self.rgbvalue = 0
 
-        #self.LJ = u6.U6()
+        self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -416,10 +416,14 @@ class controller(tk.Tk):
             if running:
                 self.temperatures = RadicalTemps(self.LJ, 0, 1)
                 np.append(self.list, self.temperatures)
+                print(self.list)
                 np.append(self.timelist, len(self.list))
-                self.GoldProbeTemp = round(self.list[-1][0], 3)
-                self.SSProbeTemp = round(self.list[-1][1], 3)
-                self.DifferenceTemp = round((self.GoldProbeTemp - self.SSProbeTemp), 3)
+                try:
+                    self.GoldProbeTemp = round(self.list[-1][0], 3)
+                    self.SSProbeTemp = round(self.list[-1][1], 3)
+                    self.DifferenceTemp = round((self.GoldProbeTemp - self.SSProbeTemp), 3)
+                except:
+                    pass
                 np.append(self.GoldProbeTempList, self.GoldProbeTemp)
                 np.append(self.SSProbeTempList, self.SSProbeTemp)
                 np.append(self.PlasmaPowerList, self.plasmapower)
