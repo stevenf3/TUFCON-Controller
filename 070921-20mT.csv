@@ -1,4 +1,4 @@
-Time,Gold Probe Temperature,Stainless Steel Probe Temperature,Radical DensityConvectron Pressure,Baratron Pressure,Ion Gauge Pressure,Plasma Power,Flow Rate
+Time,Gold Probe Temperature,Stainless Steel Probe Temperature,Radical Density,Convectron Pressure,Baratron Pressure,Ion Gauge Pressure,Plasma Power,Flow Rate
 1,56.894,44.054,1.4537348459995634e+20,0.03697002647724291,0.02014842322064578,nan,200,3
 2,57.344,43.971,1.5140979613362497e+20,0.03682247156396331,0.020111318298415427,nan,200,3
 3,57.514,43.987,1.5315305521442115e+20,0.037151924968892754,0.020178107158430065,nan,200,3
