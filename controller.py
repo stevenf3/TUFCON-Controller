@@ -415,15 +415,10 @@ class controller(tk.Tk):
         with open('temps.txt','a') as temptxt:
             if running:
                 self.temperatures = RadicalTemps(self.LJ, 0, 1)
-                self.temperaturearray = np.array([self.temperatures])
-                print(self.temperaturearray)
-                np.append(self.list, self.temperaturearray)
-                print(self.list)
+                np.append(self.list, self.temperatures)
                 np.append(self.timelist, len(self.list))
-
-                self.GoldProbeTemp = round(self.temperatures[0], 3)
-                print(self.GoldProbeTemp)
-                self.SSProbeTemp = round(self.temperatures[1], 3)
+                self.GoldProbeTemp = round(self.list[-1][0], 3)
+                self.SSProbeTemp = round(self.list[-1][1], 3)
                 self.DifferenceTemp = round((self.GoldProbeTemp - self.SSProbeTemp), 3)
                 np.append(self.GoldProbeTempList, self.GoldProbeTemp)
                 np.append(self.SSProbeTempList, self.SSProbeTemp)
