@@ -67,7 +67,7 @@ class controller(tk.Tk):
         self.tkintercolorlist = tkintercolorlist()
         self.rgbvalue = 0
 
-        self.LJ = u6.U6()
+        #self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -412,133 +412,132 @@ class controller(tk.Tk):
         self.after(500, self.rgbmode)
 
     def scanning(self):
-        with open('temps.txt','a') as temptxt:
-            if running:
-                self.temperatures = RadicalTemps(self.LJ, 0, 1)
-                np.append(self.list, self.temperatures)
-                np.append(self.timelist, len(self.list))
-                self.GoldProbeTemp = round(self.list[-1][0], 3)
-                self.SSProbeTemp = round(self.list[-1][1], 3)
-                self.DifferenceTemp = round((self.GoldProbeTemp - self.SSProbeTemp), 3)
-                np.append(self.GoldProbeTempList, self.GoldProbeTemp)
-                np.append(self.SSProbeTempList, self.SSProbeTemp)
-                np.append(self.PlasmaPowerList, self.plasmapower)
-                np.append(self.FlowRateList, self.flowrate)
+        if running:
+            self.temperatures = RadicalTemps(self.LJ, 0, 1)
+            np.append(self.list, self.temperatures)
+            np.append(self.timelist, len(self.list))
+            self.GoldProbeTemp = round(self.list[-1][0], 3)
+            self.SSProbeTemp = round(self.list[-1][1], 3)
+            self.DifferenceTemp = round((self.GoldProbeTemp - self.SSProbeTemp), 3)
+            np.append(self.GoldProbeTempList, self.GoldProbeTemp)
+            np.append(self.SSProbeTempList, self.SSProbeTemp)
+            np.append(self.PlasmaPowerList, self.plasmapower)
+            np.append(self.FlowRateList, self.flowrate)
 
-                self.GoldProbe['text'] = str(self.GoldProbeTemp)
-                self.SSProbe['text'] = str(self.SSProbeTemp)
-                self.Difference['text'] = str(self.DifferenceTemp)
-                self.maxlim1 = 1.25 * max(max(self.list))
-
-
-                self.last60 = self.list[-60:]
-                self.maxlim2 = 1.25 * max(max(self.last60))
-
-                self.xmax2 = self.timelist[-1]
-
-                if (self.timelist[-1] - 60) <= 0:
-                    self.xmax1 = 0
-                else:
-                    self.xmax1 = self.xmax2 - 60
+            self.GoldProbe['text'] = str(self.GoldProbeTemp)
+            self.SSProbe['text'] = str(self.SSProbeTemp)
+            self.Difference['text'] = str(self.DifferenceTemp)
+            self.maxlim1 = 1.25 * max(max(self.list))
 
 
-                self.chi = 12.19905 + 0.01942087*self.SSProbeTemp - 0.000007456439*(self.SSProbeTemp**2)
+            self.last60 = self.list[-60:]
+            self.maxlim2 = 1.25 * max(max(self.last60))
+
+            self.xmax2 = self.timelist[-1]
+
+            if (self.timelist[-1] - 60) <= 0:
+                self.xmax1 = 0
+            else:
+                self.xmax1 = self.xmax2 - 60
+
+
+            self.chi = 12.19905 + 0.01942087*self.SSProbeTemp - 0.000007456439*(self.SSProbeTemp**2)
             #    self.Conductivity['text'] = str(round(self.chi, 3))
 
 
-                self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
-                self.RadicalDensity['text'] = "{:0.3e}".format(self.RadicalDensityValue)
-                np.append(self.RadicalDensityList, self.RadicalDensityValue)
-                self.maxlim3 = 10 * max(self.RadicalDensityList)
-                self.Radical60 = self.RadicalDensityList[-60:]
-                self.maxlim4 = 10 * max(self.Radical60)
+            self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
+            self.RadicalDensity['text'] = "{:0.3e}".format(self.RadicalDensityValue)
+            np.append(self.RadicalDensityList, self.RadicalDensityValue)
+            self.maxlim3 = 10 * max(self.RadicalDensityList)
+            self.Radical60 = self.RadicalDensityList[-60:]
+            self.maxlim4 = 10 * max(self.Radical60)
 
-                self.ConvectronPressureValue = CorrectedConvectronPressure(self.LJ, 2)
-                np.append(self.ConvectronPressureList, self.ConvectronPressureValue)
-                self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
-                self.pressureylim1 = 10 * max(self.ConvectronPressureList)
-                self.pressureylim2 = 10 * max(self.ConvectronPressureList[-60:])
+            self.ConvectronPressureValue = CorrectedConvectronPressure(self.LJ, 2)
+            np.append(self.ConvectronPressureList, self.ConvectronPressureValue)
+            self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
+            self.pressureylim1 = 10 * max(self.ConvectronPressureList)
+            self.pressureylim2 = 10 * max(self.ConvectronPressureList[-60:])
 
-                self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
-                np.append(self.BaratronPressureList, self.BaratronPressureValue)
-                self.BaratronPressure['text'] = "{:0.3e}".format(self.BaratronPressureValue)
+            self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
+            np.append(self.BaratronPressureList, self.BaratronPressureValue)
+            self.BaratronPressure['text'] = "{:0.3e}".format(self.BaratronPressureValue)
 
-                self.IonGaugePressureValue = IonGaugePressure(self.LJ, 4)
-                if self.IonGaugePressureValue == 'Ion Gauge Off':
-                    np.append(self.IonGaugePressureList, np.nan)
-                    self.IonGaugePressure['text'] = 'Ion Gauge Off'
-                else:
-                    np.append(self.IonGaugePressureList, self.IonGaugePressureValue)
-                    try:
-                        self.IonGaugePressure['text'] = "{:0.3e}".format(self.IonGaugePressureValue)
-                    except:
-                        self.IonGaugePressure['text'] = str(self.IonGaugePressureValue)
-
-
-                self.plot1.remove()
-                self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
-                self.plot1.set_xlabel('Time (s)')
-                self.plot1.set_ylabel('Temperature (deg C)')
-                self.plot1.set_title('Temperature(deg C)')
-                self.plot1.plot(self.timelist, self.GoldProbeTempList, color='orange')
-                self.plot1.plot(self.timelist, self.SSProbeTempList, color='blue')
+            self.IonGaugePressureValue = IonGaugePressure(self.LJ, 4)
+            if self.IonGaugePressureValue == 'Ion Gauge Off':
+                np.append(self.IonGaugePressureList, np.nan)
+                self.IonGaugePressure['text'] = 'Ion Gauge Off'
+            else:
+                np.append(self.IonGaugePressureList, self.IonGaugePressureValue)
+                try:
+                    self.IonGaugePressure['text'] = "{:0.3e}".format(self.IonGaugePressureValue)
+                except:
+                    self.IonGaugePressure['text'] = str(self.IonGaugePressureValue)
 
 
-                self.plot2.remove()
-                self.plot2 = self.fig1.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(0, self.maxlim2))
-                self.plot2.set_xlabel('Time (s)')
-                self.plot2.set_ylabel('Temperature (deg C)')
-                self.plot2.set_title('Temperature(deg C)')
-                self.plot2.plot(self.timelist[-60:], self.GoldProbeTempList[-60:], color='orange')
-                self.plot2.plot(self.timelist[-60:], self.SSProbeTempList[-60:], color='blue')
+            self.plot1.remove()
+            self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
+            self.plot1.set_xlabel('Time (s)')
+            self.plot1.set_ylabel('Temperature (deg C)')
+            self.plot1.set_title('Temperature(deg C)')
+            self.plot1.plot(self.timelist, self.GoldProbeTempList, color='orange')
+            self.plot1.plot(self.timelist, self.SSProbeTempList, color='blue')
 
-                self.canvas.draw()
 
-                self.plot3.remove()
-                self.plot3 = self.fig2.add_subplot(211, ylim=(1e19,self.maxlim3),yscale='log')
-                self.plot3.set_xlabel('Time (s)')
-                self.plot3.set_ylabel('Radical Density')
-                #self.plot3.set_yscale('log')
-                self.plot3.set_title('Radical Density')
-                self.plot3.plot(self.timelist, self.RadicalDensityList, color='green')
+            self.plot2.remove()
+            self.plot2 = self.fig1.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(0, self.maxlim2))
+            self.plot2.set_xlabel('Time (s)')
+            self.plot2.set_ylabel('Temperature (deg C)')
+            self.plot2.set_title('Temperature(deg C)')
+            self.plot2.plot(self.timelist[-60:], self.GoldProbeTempList[-60:], color='orange')
+            self.plot2.plot(self.timelist[-60:], self.SSProbeTempList[-60:], color='blue')
 
-                self.plot4.remove()
-                self.plot4 = self.fig2.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(1e19,self.maxlim4),yscale='log')
-                self.plot4.set_xlabel('Time (s)')
-                self.plot4.set_ylabel('Radical Density')
+            self.canvas.draw()
+
+            self.plot3.remove()
+            self.plot3 = self.fig2.add_subplot(211, ylim=(1e19,self.maxlim3),yscale='log')
+            self.plot3.set_xlabel('Time (s)')
+            self.plot3.set_ylabel('Radical Density')
+            #self.plot3.set_yscale('log')
+            self.plot3.set_title('Radical Density')
+            self.plot3.plot(self.timelist, self.RadicalDensityList, color='green')
+
+            self.plot4.remove()
+            self.plot4 = self.fig2.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(1e19,self.maxlim4),yscale='log')
+            self.plot4.set_xlabel('Time (s)')
+            self.plot4.set_ylabel('Radical Density')
                 #self.plot4.set_yscale('log')
-                self.plot4.set_title('Radical Density (n/m3)')
-                self.plot4.plot(self.timelist[-60:], self.RadicalDensityList[-60:], color='red')
+            self.plot4.set_title('Radical Density (n/m3)')
+            self.plot4.plot(self.timelist[-60:], self.RadicalDensityList[-60:], color='red')
 
 
-                self.canvas2.draw()
+            self.canvas2.draw()
 
-                self.plot5.remove()
-                self.plot5 = self.fig3.add_subplot(211, ylim=(1e-6,self.pressureylim1))
-                self.plot5.set_xlabel('Time (s)')
-                self.plot5.set_ylabel('Pressure (Torr)')
+            self.plot5.remove()
+            self.plot5 = self.fig3.add_subplot(211, ylim=(1e-6,self.pressureylim1))
+            self.plot5.set_xlabel('Time (s)')
+            self.plot5.set_ylabel('Pressure (Torr)')
                 #self.plot5.set_yscale('log')
-                self.plot5.set_title('Pressure')
-                self.plot5.plot(self.timelist, self.ConvectronPressureList, color='purple')
-                self.plot5.plot(self.timelist, self.BaratronPressureList, color='blue')
-                for pressure in self.IonGaugePressureList:
-                    self.plot5.plot(self.timelist, self.IonGaugePressureList, color='green')
+            self.plot5.set_title('Pressure')
+            self.plot5.plot(self.timelist, self.ConvectronPressureList, color='purple')
+            self.plot5.plot(self.timelist, self.BaratronPressureList, color='blue')
+            for pressure in self.IonGaugePressureList:
+                self.plot5.plot(self.timelist, self.IonGaugePressureList, color='green')
 
 
-                self.plot6.remove()
-                self.plot6 = self.fig3.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(1e-6,self.pressureylim2),yscale='log')
-                self.plot6.set_xlabel('Time (s)')
-                self.plot6.set_ylabel('Pressure (Torr)')
+            self.plot6.remove()
+            self.plot6 = self.fig3.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(1e-6,self.pressureylim2),yscale='log')
+            self.plot6.set_xlabel('Time (s)')
+            self.plot6.set_ylabel('Pressure (Torr)')
             #    self.plot6.set_yscale('log')
-                self.plot6.set_title('Pressure')
-                self.plot6.plot(self.timelist[-60:], self.ConvectronPressureList[-60:], color='gold')
-                self.canvas3.draw()
+            self.plot6.set_title('Pressure')
+            self.plot6.plot(self.timelist[-60:], self.ConvectronPressureList[-60:], color='gold')
+            self.canvas3.draw()
 
 
 
 
 
-        self.after(1000, self.scanning)
+            self.after(1000, self.scanning)
 
     def exportdata(self):
         self.totallist = []

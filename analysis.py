@@ -3,6 +3,7 @@ import numpy as np
 import csv
 import pandas as pd
 from scipy.signal import savgol_filter
+from math import *
 
 filename = '070921-60mTorr.csv'
 powers = [200, 400, 600, 800, 1000]
@@ -23,14 +24,8 @@ ax.set_ylim([7e19, 3e21])
 
 ax.set_title('Radical Density vs Time (60 mTorr)')
 
-figT, axT = plt.subplots()
-axT.plot(timelist, GoldTempList, label='Gold Probe Temperature')
-axT.plot(timelist, SSTempList, label='SS Probe Temperature')
-axT.set_title('Probe Temperatures in 60 mTorr Plasma')
-axT.set_xlabel('Time (s)')
-axT.set_ylabel('Temperature (deg C)')
-axT.legend()
-plt.show()
+
+
 AvgList = []
 firstatavg = []
 changeslist = []
@@ -153,36 +148,56 @@ difflist = []
 errorlist = []
 pressureslist = []
 D2ConvList = []
+
+newDPressure = []
+newNPressure = []
 for i in range(len(N2Pressure)):
-    x = D2Pressure[i]
-    D2Conv = 14.559*x**4 - 6.7341*x**3 + 0.7327*x**2 + 0.8099*x + 4E-05
-    #D2Conv = 0.829*x**1.0034
-    diff = D2Conv - N2Pressure[i]
-    error = abs(diff/N2Pressure[i])
+    x = D2Voltage[i] - 5
+    n2x = N2Voltage[i] - 5
+    #D2Conv = 14.559*x**4 - 6.7341*x**3 + 0.7327*x**2 + 0.8099*x + 4E-5
+    D2Conv = 0.0302*x**4 + 0.2007*x**3 + 0.4472*x**2 + 1.3791*x + 0.0133
+    #diff = D2Conv - N2Pressure[i]
+    newDVal = 10**D2Conv
+    newDPressure.append(newDVal)
+
+    diff = newDVal - N2Pressure[i]
+    error = 100 * abs(diff/N2Pressure[i])
     errorlist.append(error)
     difflist.append(diff)
     D2ConvList.append(D2Conv)
-
-    newentry2 = [D2Pressure[i], N2Pressure[i]]
+    newentry2 = [x, n2x]
     pressureslist.append(newentry2)
+
+
+    print(newDPressure[i], N2Pressure[i])
 
 avg = np.mean(errorlist)
 print(errorlist)
 print(avg)
 
-print(len(D2Voltage), len(N2Voltage))
 fig2, ax2 = plt.subplots()
-ax2.plot(D2Pressure, N2Pressure, marker='o')
-ax2.plot(D2ConvList, N2Pressure)
+ax2.plot(D2Pressure, N2Pressure, marker='o', label='')
+ax2.plot(N2Pressure, N2Pressure, marker='o')
 ax2.set_title('D2 vs N2 Pressure')
 ax2.set_xlabel('D2 Pressure')
 ax2.set_ylabel('N2 Pressure')
 ax2.set_yscale('log')
 ax2.set_xscale('log')
-ax.set_ylim(1e-4, 2.5e-1)
+ax.set_ylim(1e-4, 2e-1)
 ax.set_xlim(1e-4, 2e-1)
 plt.show()
 
+convpressureheader = ['D2', 'N2']
 with open('convertedpressure.csv', 'w') as file:
     writer = csv.writer(file)
+    writer.writerow(convpressureheader)
     writer.writerows(pressureslist)
+
+figT, axT = plt.subplots()
+axT.plot(timelist, GoldTempList, label='Gold Probe Temperature')
+axT.plot(timelist, SSTempList, label='SS Probe Temperature')
+axT.set_title('Probe Temperatures in 60 mTorr Plasma')
+axT.set_xlabel('Time (s)')
+axT.set_ylabel('Temperature (deg C)')
+axT.legend()
+plt.show()
