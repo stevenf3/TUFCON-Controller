@@ -15,7 +15,7 @@ running = False
 df = pd.read_csv('070921-60mTorr.csv')
 GP = df['Gold Probe Temperature']
 SS = df['Stainless Steel Probe Temperature']
-
+plt.ion()
 class animation(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -23,12 +23,8 @@ class animation(tk.Tk):
 
         self.running = False
         self.i=-1
-        self.iten = -1
-        self.list = np.array([])
-        self.timelist = np.array([])
-        self.GoldProbeTempList = np.array([])
-        self.SSProbeTempList = np.array([])
-        self.GPData = np.zeros((10,1))
+        self.j = -1
+        self.TempData = np.zeros((10,2))
 
         self.s = ttk.Style()
         self.s.configure('.', font=('Cambria'), fontsize=16)
@@ -44,8 +40,12 @@ class animation(tk.Tk):
         self.frame2.grid(column=1, row=0, sticky='news')
 
         self.fig1 = Figure(figsize=(5,5), dpi=100)
-        self.plot1 = self.fig1.add_subplot(111)
-        self.line1, = self.plot1.plot(0,0,'b-')
+        self.plot1 = self.fig1.add_subplot(211)
+        self.line1, = self.plot1.plot([],[],'gold')
+        self.line2, = self.plot1.plot([],[],'blue')
+
+        self.plot2 = self.fig1.add_subplot(212)
+        self.line3, = self.plot2.plot([],[],'gold')
 
         self.canvas = FigureCanvasTkAgg(self.fig1, master=self.frame1)
         self.canvas.draw()
@@ -85,23 +85,37 @@ class animation(tk.Tk):
             if self.running:
                 tick = time.time()
                 self.i += 1
-                self.iten += 1
-                if self.iten == 10:
-                    self.iten = 0
-                    np.savetxt(file, self.GPData)
-                    self.GPData = np.zeros((10,1))
-                print(self.i)
-                print(self.iten)
-                print(GP[self.i])
-                print(SS[self.i])
-                self.GPData[self.iten, 0] = GP[self.i]
-                print(self.GPData)
+                self.j += 1
+                if self.j == 10:
+                    self.j = 0
+                    np.savetxt(file, self.TempData)
+                    self.TempData = np.zeros((10,2))
+                self.TempData[self.j, 0] = GP[self.i]
+                self.TempData[self.j, 1] = SS[self.i]
 
-                self.line1.set_xdata(self.i)
-                self.line1.set_ydata(GP[self.i])
+                if self.i <= 60:
+                    minutemin = 0
+                    minutemax = self.i
+                else:
+                    minutemin = self.i-60
+                    minutemax = self.i
+
+                self.line1.set_xdata(np.append(self.line1.get_xdata(), self.i))
+                self.line1.set_ydata(np.append(self.line1.get_ydata(), GP[self.i]))
+                self.line2.set_xdata(np.append(self.line2.get_xdata(), self.i))
+                self.line2.set_ydata(np.append(self.line2.get_ydata(), SS[self.i]))
+                self.plot1.relim()
+                self.plot1.autoscale_view()
+
+                self.line3.set_xdata(np.append(self.line1.get_xdata(), self.i))
+                self.line3.set_ydata(np.append(self.line2.get_ydata(), GP[self.i]))
+                self.plot2.relim()
+                self.plot2.set_xlim(minutemin, minutemax)
+                self.plot2.autoscale_view()
                 self.canvas.draw()
                 tock = time.time()
                 delay = int(1000 * (tock - tick))
+                print(delay)
             try:
                 self.after(1000 - delay, self.scanning)
             except UnboundLocalError:
