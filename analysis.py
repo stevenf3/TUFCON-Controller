@@ -4,8 +4,9 @@ import csv
 import pandas as pd
 from scipy.signal import savgol_filter
 from math import *
-
-filename = '070921-60mTorr.csv'
+import time
+tick = time.time()
+filename = '070921-100mT.csv'
 powers = [200, 400, 600, 800, 1000]
 df = pd.read_csv(filename)
 #df.plot('Time', 'Radical Density', logy=True, ylim=(1e19, 1e21))
@@ -16,15 +17,93 @@ GoldTempList = df['Gold Probe Temperature'].tolist()
 SSTempList = df['Stainless Steel Probe Temperature'].tolist()
 Radsavgol = savgol_filter(RadList, 51, 2)
 fig, ax = plt.subplots()
-ax.plot(timelist, RadList, label='Radical Density (n/m3)')
+
+lenRadList = int(len(RadList))
+masteravglist = []
+avgdiff = []
+sslist = []
+indlist = []
+windowsize = 10
+
+for i in range(int(lenRadList / windowsize)):
+    try:
+        y2 = RadList[(i + 1)*windowsize]
+        y1 = RadList[i*windowsize]
+    except IndexError:
+        continue
+
+    x2 = (i + 1)*windowsize
+    x1 = i*windowsize
+
+    IncAvgList = []
+    for val in RadList[x1:x2]:
+        IncAvgList.append(val)
+
+    IncAvg = np.mean(IncAvgList)
+    masteravglist.append(IncAvg)
+
+for ind in range(len(masteravglist)):
+    try:
+        avg2 = masteravglist[ind+1]
+        avg1 = masteravglist[ind]
+    except IndexError:
+        continue
+
+    comp = avg2/avg1
+
+    if abs(comp) <= 1.001:
+        sslist.append(comp)
+        indlist.append(ind)
+    elif abs(comp) >= 1.001:
+        sslist.append(np.nan)
+        indlist.append(ind)
+
+    avgdiff.append(comp)
+
+line = np.arange(0, len(avgdiff)*windowsize, windowsize)
+
+ax.plot(timelist, RadList, label='Radical Density')
+
+agglist = [[],[],[],[],[]]
+for powdex in range(len(powers)):
+    try:
+        powstart = ceil(PowerList.index(powers[powdex]) / windowsize)
+        powend = floor(PowerList.index(powers[powdex+1])/ windowsize)
+    except IndexError:
+        powend = floor(timelist[-1] / windowsize)
+
+    print(powdex, powstart, powend)
+
+    for i in sslist[powstart:powend]:
+        index = sslist.index(i)
+        if index != 0:
+            agglist[powdex].append(index * 10)
+
+avgRadList = []
+stdList = []
+for agg in agglist:
+    x1 = agg[0]
+    x2 = agg[-1]
+    xrange = np.arange(x1, x2, 1)
+    #print(x1, x2)
+    ax.plot(xrange, RadList[x1:x2], color='orange')
+    validRads = RadList[x1:x2]
+    avgs = np.mean(validRads)
+    stds = np.std(validRads)
+    print(avgs)
+    avgRadList.append(avgs)
+    stdList.append(stds)
+
+print('agglist:', agglist[0][-1])
+print('avgradlist:', avgRadList)
+print('stdList:', stdList)
+
 ax.set_xlabel('Time (s, approximate)')
-ax.set_ylabel('Radical Density (n/m3)')
+ax.set_ylabel('Radical Density (m-3)')
 ax.set_yscale('log')
 ax.set_ylim([7e19, 3e21])
 
 ax.set_title('Radical Density vs Time (60 mTorr)')
-
-
 
 AvgList = []
 firstatavg = []
@@ -34,7 +113,6 @@ for power in powers:
     changeslist.append(change)
     ax.vlines(change, ymin=7e19, ymax=3e21)
 
-
     if power != 1000:
         firstpoint = PowerList.index(power+200) - 45
         lastpoint = PowerList.index(power+200) - 5
@@ -43,7 +121,7 @@ for power in powers:
         AvgList.append(Avg)
         min = PowerList.index(power)
         max = timelist[PowerList.index(power+200)]
-        ax.plot([min,max], [Avg, Avg], color='orange')
+        #ax.plot([min,max], [Avg, Avg], color='orange')
 
         power1 = PowerList.index(power)
         power2 = PowerList.index(power+200)
@@ -54,7 +132,7 @@ for power in powers:
             if percdiff <= 0.01:
                 if percdiff >= -0.01:
                     atavg.append(RadList.index(rad))
-                    ax.vlines(RadList.index(rad), ymin=0.5*rad, ymax = 1.5*rad, color='silver')
+                    #ax.vlines(RadList.index(rad), ymin=0.5*rad, ymax = 1.5*rad, color='silver')
         firstatavg.append(atavg[0])
     else:
         firstpoint = timelist[-45]
@@ -64,7 +142,7 @@ for power in powers:
         AvgList.append(Avg)
         min = PowerList.index(power)
         max = timelist[-1]
-        ax.plot([min,max], [Avg, Avg], color='orange')
+        #ax.plot([min,max], [Avg, Avg], color='orange')
 
         power1 = PowerList.index(power)
         power2 = timelist[-1]
@@ -75,7 +153,6 @@ for power in powers:
             if percdiff <= 0.01:
                 if percdiff >= -0.01:
                     atavg.append(RadList.index(rad))
-                    ax.vlines(RadList.index(rad), ymin=0.5*rad, ymax = 1.5*rad, color='silver')
 
         firstatavg.append(atavg[0])
 
@@ -85,7 +162,7 @@ for i in range(len(firstatavg)):
     timetolist.append(timeto)
 
 
-writerfile = '070921-60mT-Analyzed'
+writerfile = '070921-20mT-Analyzed'
 csvheader = ['Pressure', 'Power', 'Equilibrium Radical Density', 'Time to Equilibrium' ]
 
 totallist = []
@@ -99,105 +176,18 @@ with open(writerfile, 'w') as file:
     filewriter.writerow(csvheader)
     filewriter.writerows(totallist)
 
-
-
-
-
-
 ax.vlines(change, ymin=8e19, ymax=3e21, label='Power Changes')
-ax.plot([min,max], [Avg, Avg], color='orange', label='Average Radical Density')
-ax.vlines(1200, ymin=1e20, ymax = 1.01e20, color='silver', label='Equilibrium Region')
+ax.plot([0,1], [0,1], color='orange', label='Equilibrium Region')
+#ax.vlines(1200, ymin=1e20, ymax = 1.01e20, color='silver', label='Equilibrium Region')
 ax.legend(loc='upper left')
 plt.show()
 
-
-
-
-TruePressure = [0.0001,
-0.0002,
-0.0005,
-0.001,
-0.002,
-0.005,
-0.01,
-0.02,
-0.05,
-0.1,
-0.2,
-0.5,
-1,
-2,
-5,
-10
-
-]
-N2Voltage = [1.699,2,2.301,2.699,3,3.301,3.699,4,4.301]
-
-D2Voltage = [1.699,2.114,2.38,2.778,3.083,3.386,3.778,4.083,4.398]
-N2Pressure = []
-for voltage in N2Voltage:
-    pressure = 10**(voltage - 5)
-    N2Pressure.append(pressure)
-
-D2Pressure = []
-for DVoltage in D2Voltage:
-    pressure = 10**(DVoltage-5)
-    D2Pressure.append(pressure)
-
-difflist = []
-errorlist = []
-pressureslist = []
-D2ConvList = []
-
-newDPressure = []
-newNPressure = []
-for i in range(len(N2Pressure)):
-    x = D2Voltage[i] - 5
-    n2x = N2Voltage[i] - 5
-    #D2Conv = 14.559*x**4 - 6.7341*x**3 + 0.7327*x**2 + 0.8099*x + 4E-5
-    D2Conv = 0.0302*x**4 + 0.2007*x**3 + 0.4472*x**2 + 1.3791*x + 0.0133
-    #diff = D2Conv - N2Pressure[i]
-    newDVal = 10**D2Conv
-    newDPressure.append(newDVal)
-
-    diff = newDVal - N2Pressure[i]
-    error = 100 * abs(diff/N2Pressure[i])
-    errorlist.append(error)
-    difflist.append(diff)
-    D2ConvList.append(D2Conv)
-    newentry2 = [x, n2x]
-    pressureslist.append(newentry2)
-
-
-    print(newDPressure[i], N2Pressure[i])
-
-avg = np.mean(errorlist)
-print(errorlist)
-print(avg)
-
 fig2, ax2 = plt.subplots()
-ax2.plot(D2Pressure, N2Pressure, marker='o', label='')
-ax2.plot(N2Pressure, N2Pressure, marker='o')
-ax2.set_title('D2 vs N2 Pressure')
-ax2.set_xlabel('D2 Pressure')
-ax2.set_ylabel('N2 Pressure')
+ax2.errorbar(powers, avgRadList, marker='o', yerr=stdList, capsize=7)
+ax2.set_title('Average Radical Density (60 mTorr)')
 ax2.set_yscale('log')
-ax2.set_xscale('log')
-ax.set_ylim(1e-4, 2e-1)
-ax.set_xlim(1e-4, 2e-1)
+ax2.set_ylabel('Radical Density (m-3)')
+ax2.set_xlabel('Power (W)')
+ax2.set_ylim([7e19, 3e21])
 plt.show()
-
-convpressureheader = ['D2', 'N2']
-with open('convertedpressure.csv', 'w') as file:
-    writer = csv.writer(file)
-    writer.writerow(convpressureheader)
-    writer.writerows(pressureslist)
-
-figT, axT = plt.subplots()
-axT.plot(timelist, GoldTempList, label='Gold Probe Temperature')
-axT.plot(timelist, SSTempList, label='SS Probe Temperature')
-axT.set_title('Probe Temperatures in 60 mTorr Plasma')
-axT.set_xlabel('Time (s)')
-axT.set_ylabel('Temperature (deg C)')
-axT.legend()
-plt.show()
+tock = time.time()

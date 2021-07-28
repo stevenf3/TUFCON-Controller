@@ -241,13 +241,6 @@ class controller(tk.Tk):
         self.FlowRateEntryButton = ttk.Button(self.frame3, text='Log Flow Rate (sccm)', command=self.logflow)
         self.FlowRateEntryButton.grid(row=9, columnspan=2,sticky='ew')
 
-#        self.LabelList= [self.RadicalDensityLabel, self.RadicalDensity, self.GoldProbeLabel,
-#        self.GoldProbe, self.SSProbeLabel, self.SSProbe, self.DifferenceLabel,
-#        self.Difference, self.ConvectronPressureLabel, self.ConvectronPressure,
-#        self.BaratronPressureLabel,self.BaratronPressure,
-#        self.IonGaugePressureLabel, self.IonGaugePressure, self.PlasmaPowerLabel,
-#        self.PlasmaPower, self.FlowRateLabel, self.FlowRate]
-
         self.selectedBGcolor = tk.StringVar()
         self.selectedTextcolor = tk.StringVar()
         self.selectedFigcolor = tk.StringVar()
@@ -448,14 +441,10 @@ class controller(tk.Tk):
 
                 self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
                 self.RadicalDensity['text'] = "{:0.3e}".format(self.RadicalDensityValue)
-                self.maxlim3 = 10 * max(self.RadicalDensityList)
                 self.Radical60 = self.RadicalDensityList[-60:]
-                self.maxlim4 = 10 * max(self.Radical60)
 
                 self.ConvectronPressureValue = CorrectedConvectronPressure(self.LJ, 2)
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
-                self.pressureylim1 = 10 * max(self.ConvectronPressureList)
-                self.pressureylim2 = 10 * max(self.ConvectronPressureList[-60:])
 
                 self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
                 self.BaratronPressure['text'] = "{:0.3e}".format(self.BaratronPressureValue)
@@ -504,7 +493,7 @@ class controller(tk.Tk):
                 self.plot4.autoscale_view()
 
                 self.pressureline.set_xdata(np.append(self.line2.get_xdata(), self.time))
-                self.pressureline.set_ydata(np.append(self.line2.get_ydata(), self.RadicalDensityValue))
+                self.pressureline.set_ydata(np.append(self.line2.get_ydata(), self.ConvectronPressure))
                 self.plot5.relim()
                 self.plot5.autoscale_view()
 
@@ -514,6 +503,8 @@ class controller(tk.Tk):
                 self.plot6.set_xlim(self.xmax1, self.xmax2)
                 self.plot6.autoscale_view()
 
+                if self.time >= 1:
+                    self.plot
                 self.canvas.draw()
                 self.canvas2.draw()
                 self.canvas3.draw()

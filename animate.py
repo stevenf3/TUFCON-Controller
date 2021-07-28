@@ -116,6 +116,7 @@ class animation(tk.Tk):
                 tock = time.time()
                 delay = int(1000 * (tock - tick))
                 print(delay)
+
             try:
                 self.after(1000 - delay, self.scanning)
             except UnboundLocalError:

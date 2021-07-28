@@ -1,0 +1,25 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+
+avg20 = [2.7503316173987978e+20, 5.511305580608753e+20, 8.754201940038858e+20, 1.174358229165847e+21, 1.3994554597815636e+21]
+std20 = [2.3976513305159777e+18, 3.718502503876807e+18, 4.2472903369037517e+18, 1.0393577104765092e+19, 2.2431552002916165e+18]
+
+avg60 = [1.704971699493096e+20, 2.520521734250536e+20, 4.7381534804580165e+20, 7.518612479931592e+20, 1.0612067439966802e+21]
+std60 = [1.9218124278788147e+18, 3.6810625698929485e+18, 6.139696412703389e+18, 5.827802777261011e+18, 1.5384111188975673e+19]
+
+avg100 = [1.3307890997795961e+20, 2.043799571408645e+20, 3.357879021176239e+20, 5.697374241532183e+20, 7.392173387844627e+20]
+std100 = [6.66328569695336e+18, 1.3187517591152927e+19, 3.4751208676205256e+18, 5.99287164806391e+18, 3.6346927503933957e+18]
+
+powers = [200, 400, 600, 800, 1000]
+
+ax.errorbar(powers, avg20, marker='o', yerr=std20, capsize=7, color='royalblue', label='20 mTorr')
+ax.errorbar(powers, avg60, marker='o', yerr=std60, capsize=7, color='mediumspringgreen', label='60 mTorr')
+ax.errorbar(powers, avg100, marker='o', yerr=std100, capsize=7, color='fuchsia', label='100 mTorr')
+ax.set_title('Radical Density of Hydrogen Plasma (20-100 mTorr)')
+ax.set_yscale('log')
+ax.set_ylabel('Radical Density (m-3)')
+ax.set_xlabel('Power (W)')
+ax.legend()
+plt.show()
