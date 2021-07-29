@@ -6,7 +6,7 @@ from scipy.signal import savgol_filter
 from math import *
 import time
 tick = time.time()
-filename = '070921-100mT.csv'
+filename = '070921-60mTorr.csv'
 powers = [200, 400, 600, 800, 1000]
 df = pd.read_csv(filename)
 #df.plot('Time', 'Radical Density', logy=True, ylim=(1e19, 1e21))
@@ -42,28 +42,33 @@ for i in range(int(lenRadList / windowsize)):
     IncAvg = np.mean(IncAvgList)
     masteravglist.append(IncAvg)
 
-for ind in range(len(masteravglist)):
+for ind in range(len(masteravglist), -3, -1):
     try:
-        avg2 = masteravglist[ind+1]
-        avg1 = masteravglist[ind]
+        avg2 = masteravglist[ind]
+        avg1 = masteravglist[ind-1]
     except IndexError:
         continue
 
     comp = avg2/avg1
 
-    if abs(comp) <= 1.001:
+
+    if abs(1-comp) <= 0.003:
         sslist.append(comp)
         indlist.append(ind)
-    elif abs(comp) >= 1.001:
+
+    elif abs(1-comp) >= 0.003:
         sslist.append(np.nan)
         indlist.append(ind)
 
     avgdiff.append(comp)
 
+
 line = np.arange(0, len(avgdiff)*windowsize, windowsize)
+fsslist = []
+for i in reversed(sslist):
+    fsslist.append(i)
 
 ax.plot(timelist, RadList, label='Radical Density')
-
 agglist = [[],[],[],[],[]]
 for powdex in range(len(powers)):
     try:
@@ -72,17 +77,16 @@ for powdex in range(len(powers)):
     except IndexError:
         powend = floor(timelist[-1] / windowsize)
 
-    print(powdex, powstart, powend)
-
-    for i in sslist[powstart:powend]:
-        index = sslist.index(i)
-        if index != 0:
+    for i in fsslist[powstart:powend]:
+        index = fsslist.index(i)
+        print('index:', isnan(i))
+        if isnan(i) == False:
             agglist[powdex].append(index * 10)
 
 avgRadList = []
 stdList = []
 for agg in agglist:
-    x1 = agg[0]
+    x1 = agg[3]
     x2 = agg[-1]
     xrange = np.arange(x1, x2, 1)
     #print(x1, x2)
@@ -94,7 +98,7 @@ for agg in agglist:
     avgRadList.append(avgs)
     stdList.append(stds)
 
-print('agglist:', agglist[0][-1])
+print('agglist:', agglist[0])
 print('avgradlist:', avgRadList)
 print('stdList:', stdList)
 
@@ -113,61 +117,13 @@ for power in powers:
     changeslist.append(change)
     ax.vlines(change, ymin=7e19, ymax=3e21)
 
-    if power != 1000:
-        firstpoint = PowerList.index(power+200) - 45
-        lastpoint = PowerList.index(power+200) - 5
-        RadRange = np.array(RadList[firstpoint:lastpoint])
-        Avg = np.mean(RadRange)
-        AvgList.append(Avg)
-        min = PowerList.index(power)
-        max = timelist[PowerList.index(power+200)]
-        #ax.plot([min,max], [Avg, Avg], color='orange')
 
-        power1 = PowerList.index(power)
-        power2 = PowerList.index(power+200)
-        atavg = []
-        for rad in RadList[power1:power2]:
-            diff = abs(Avg - rad)
-            percdiff = diff/Avg
-            if percdiff <= 0.01:
-                if percdiff >= -0.01:
-                    atavg.append(RadList.index(rad))
-                    #ax.vlines(RadList.index(rad), ymin=0.5*rad, ymax = 1.5*rad, color='silver')
-        firstatavg.append(atavg[0])
-    else:
-        firstpoint = timelist[-45]
-        lastpoint = timelist[-5]
-        RadRange = np.array(RadList[firstpoint:lastpoint])
-        Avg = np.mean(RadRange)
-        AvgList.append(Avg)
-        min = PowerList.index(power)
-        max = timelist[-1]
-        #ax.plot([min,max], [Avg, Avg], color='orange')
-
-        power1 = PowerList.index(power)
-        power2 = timelist[-1]
-        atavg = []
-        for rad in RadList[power1:power2]:
-            diff = abs(Avg - rad)
-            percdiff = diff/Avg
-            if percdiff <= 0.01:
-                if percdiff >= -0.01:
-                    atavg.append(RadList.index(rad))
-
-        firstatavg.append(atavg[0])
-
-timetolist = []
-for i in range(len(firstatavg)):
-    timeto = firstatavg[i] - changeslist[i]
-    timetolist.append(timeto)
-
-
-writerfile = '070921-20mT-Analyzed'
-csvheader = ['Pressure', 'Power', 'Equilibrium Radical Density', 'Time to Equilibrium' ]
+writerfile = '070921-100mT-Analyzed'
+csvheader = ['Pressure', 'Power', 'Average Radical Density', 'Average Standard Deviation']
 
 totallist = []
 for j in range(len(powers)):
-    newentry = [60, powers[j], AvgList[j], timetolist[j]]
+    newentry = [60, powers[j], avgRadList[j], stdList[j]]
     totallist.append(newentry)
 
 with open(writerfile, 'w') as file:
