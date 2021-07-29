@@ -17,6 +17,7 @@ from Gauges import *
 import matplotlib.colors
 from tkintercolorlist import *
 import random
+from conbarconversion import *
 #from colour import Color
 
 running = False
@@ -460,7 +461,7 @@ class controller(tk.Tk):
                 self.maxlim4 = 10 * max(self.Radical60)
 
                 self.ConvectronPressureValue = ConvectronPressure(self.LJ, 2)
-                self.ConvectronPressureList.append(self.ConvectronPressureValue)
+                self.ConvectronPressureList.append(correct(self.ConvectronPressureValue))
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
                 self.pressureylim1 = 10 * max(self.ConvectronPressureList)
                 self.pressureylim2 = 10 * max(self.ConvectronPressureList[-60:])
