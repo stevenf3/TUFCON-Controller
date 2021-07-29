@@ -459,7 +459,7 @@ class controller(tk.Tk):
                 self.Radical60 = self.RadicalDensityList[-60:]
                 self.maxlim4 = 10 * max(self.Radical60)
 
-                self.ConvectronPressureValue = CorrectedConvectronPressure(self.LJ, 2)
+                self.ConvectronPressureValue = ConvectronPressure(self.LJ, 2)
                 self.ConvectronPressureList.append(self.ConvectronPressureValue)
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
                 self.pressureylim1 = 10 * max(self.ConvectronPressureList)
@@ -523,7 +523,7 @@ class controller(tk.Tk):
                 self.plot5 = self.fig3.add_subplot(211, ylim=(1e-6,self.pressureylim1))
                 self.plot5.set_xlabel('Time (s)')
                 self.plot5.set_ylabel('Pressure (Torr)')
-                #self.plot5.set_yscale('log')
+                self.plot5.set_yscale('log')
                 self.plot5.set_title('Pressure')
                 self.plot5.plot(self.timelist, self.ConvectronPressureList, color='purple')
                 self.plot5.plot(self.timelist, self.BaratronPressureList, color='blue')
