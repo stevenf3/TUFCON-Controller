@@ -460,8 +460,8 @@ class controller(tk.Tk):
                 self.Radical60 = self.RadicalDensityList[-60:]
                 self.maxlim4 = 10 * max(self.Radical60)
 
-                self.ConvectronPressureValue = ConvectronPressure(self.LJ, 2)
-                self.ConvectronPressureList.append(correct(self.ConvectronPressureValue))
+                self.ConvectronPressureValue = correct(ConvectronPressure(self.LJ, 2))
+                self.ConvectronPressureList.append(self.ConvectronPressureValue)
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
                 self.pressureylim1 = 10 * max(self.ConvectronPressureList)
                 self.pressureylim2 = 10 * max(self.ConvectronPressureList[-60:])
