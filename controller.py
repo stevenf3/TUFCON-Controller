@@ -18,7 +18,6 @@ import matplotlib.colors
 from tkintercolorlist import *
 import random
 import time
-from conbarconversion import *
 #from colour import Color
 
 running = False
@@ -60,7 +59,7 @@ class controller(tk.Tk):
         self.rgbvalue = 0
         self.DataTable = np.zeros((10, 9))
 
-        #self.LJ = u6.U6()
+        self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -77,10 +76,8 @@ class controller(tk.Tk):
         self.frame1 = ttk.Frame(self)
         self.frame1.grid(column=0, row=0, sticky='news')
 
-
         self.notebook = ttk.Notebook(self)
         self.notebook.grid(column=1, row=0, sticky='news')
-
 
         self.frame2 = ttk.Frame(self.notebook)
         self.notebook.add(self.frame2, text='Temperatures')
@@ -131,7 +128,6 @@ class controller(tk.Tk):
         self.plot6.set_xlabel('Time (s)')
         self.plot6.set_ylabel('Pressure (Torr)')
         self.pressureline60, = self.plot6.plot([],[],'purple')
-
 
         self.canvas = FigureCanvasTkAgg(self.fig1, master=self.frame2)
         self.canvas.draw()
@@ -264,16 +260,11 @@ class controller(tk.Tk):
         self.FigureColor = ttk.Label(self.frame2s, text='Figure Background Color:')
         self.FigureColor.grid(row=3, column=0,sticky='ew')
 
-    #    self.FigureColorEntry = ttk.Entry(self.frame2s)
-    #    self.FigureColorEntry.grid(row=3, column=1, sticky='ew')
-
         self.ChangeFigureColorButton = ttk.Button(self.frame2s, text='Change',command=self.changefigurecolor)
         self.ChangeFigureColorButton.grid(row=3, column=2)
 
-
         self.MatplotColorDropdown = ttk.Combobox(self.frame2s, textvariable=self.selectedFigcolor, values=self.matplotcolorlist)
         self.MatplotColorDropdown.grid(row=3, column=1)
-
 
     def onclose(self):
         plt.close('all')
@@ -372,8 +363,7 @@ class controller(tk.Tk):
             self.canvas2.draw()
             self.canvas3.draw()
             self.DarkModeButton['text'] = 'Dark Mode'
-            #for label in self.LabelList:
-            #    label['background']='gray23'
+
 
     def startrgb(self):
         global rgbon
@@ -384,7 +374,6 @@ class controller(tk.Tk):
         elif self.rgbvalue == 1:
             self.rgbvalue = 0
             rgbon = False
-
 
     def rgbmode(self):
         if rgbon:
@@ -418,13 +407,13 @@ class controller(tk.Tk):
                     self.DataTable = np.zeros((10,9))
 
                 self.temperatures = RadicalTemps(self.LJ, 0, 1)
-                self.GoldProbeTemp = round(self.temperatures[0])
-                self.SSProbeTemp = round(self.temperatures[1])
+                self.GoldProbeTemp = self.temperatures[0]
+                self.SSProbeTemp = self.temperatures[1]
                 self.DifferenceTemp = round((self.GoldProbeTemp - self.SSProbeTemp), 3)
 
-                self.GoldProbe['text'] = str(self.GoldProbeTemp)
-                self.SSProbe['text'] = str(self.SSProbeTemp)
-                self.Difference['text'] = str(self.DifferenceTemp)
+                self.GoldProbe['text'] = "{:0.3e}".format(self.GoldProbeTemp)
+                self.SSProbe['text'] = "{:0.3e}".format(self.SSProbeTemp)
+                self.Difference['text'] = "{:0.3e}".format(self.DifferenceTemp)
 
                 if self.time == 0:
                     self.xmax2 = 1
@@ -444,7 +433,7 @@ class controller(tk.Tk):
                 self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
                 self.RadicalDensity['text'] = "{:0.3e}".format(self.RadicalDensityValue)
 
-                self.ConvectronPressureValue = correct(ConvectronPressure(self.LJ, 2))
+                self.ConvectronPressureValue = CorrectedConvectronPressure(self.LJ, 2)
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
 
                 self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
@@ -469,18 +458,14 @@ class controller(tk.Tk):
                 self.DataTable[self.j, 7] = self.plasmapower
                 self.DataTable[self.j, 8] = self.flowrate
 
-<<<<<<< HEAD
                 print(self.DataTable)
 
-=======
->>>>>>> 8b48a8be226f41f4327989f6d4021a368e216a4a
                 self.goldline.set_xdata(np.append(self.goldline.get_xdata(), self.time))
                 self.goldline.set_ydata(np.append(self.goldline.get_ydata(), self.GoldProbeTemp))
                 self.ssline.set_xdata(np.append(self.ssline.get_xdata(), self.time))
                 self.ssline.set_ydata(np.append(self.ssline.get_ydata(), self.SSProbeTemp))
                 self.plot1.relim()
                 self.plot1.autoscale_view()
-                print(self.GoldProbeTemp, self.SSProbeTemp)
 
                 self.goldline60.set_xdata(np.append(self.goldline60.get_xdata(), self.time))
                 self.goldline60.set_ydata(np.append(self.goldline60.get_ydata(), self.GoldProbeTemp))
@@ -508,7 +493,7 @@ class controller(tk.Tk):
                 self.plot5.relim()
                 self.plot5.autoscale_view()
                 #self.plot5.set_yscale('log')
-                print(self.ConvectronPressureValue,self.BaratronPressureValue)
+
                 self.pressureline60.set_xdata(np.append(self.pressureline60.get_xdata(), self.time))
                 self.pressureline60.set_ydata(np.append(self.pressureline60.get_ydata(), self.ConvectronPressureValue))
                 self.plot6.relim()
@@ -518,14 +503,11 @@ class controller(tk.Tk):
 
                 if self.time  >= 2:
                     self.plot5.set_yscale('log')
-                    self.plot5.relim()
                     self.plot6.set_yscale('log')
-                    self.plot6.relim()
 
                 self.canvas.draw()
                 self.canvas2.draw()
                 self.canvas3.draw()
-
 
                 tock = time.time()
                 delay = 1000 * int(tock - tick)
