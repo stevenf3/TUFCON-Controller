@@ -433,7 +433,7 @@ class controller(tk.Tk):
                 self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
                 self.RadicalDensity['text'] = "{:0.3e}".format(self.RadicalDensityValue)
 
-                self.ConvectronPressureValue = CorrectedConvectronPressure(self.LJ, 2)
+                self.ConvectronPressureValue = correct(ConvectronPressure(self.LJ, 2))
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
 
                 self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
@@ -457,8 +457,6 @@ class controller(tk.Tk):
                     self.DataTable[self.j, 6] = np.nan
                 self.DataTable[self.j, 7] = self.plasmapower
                 self.DataTable[self.j, 8] = self.flowrate
-
-                print(self.DataTable)
 
                 self.goldline.set_xdata(np.append(self.goldline.get_xdata(), self.time))
                 self.goldline.set_ydata(np.append(self.goldline.get_ydata(), self.GoldProbeTemp))
@@ -539,8 +537,10 @@ class controller(tk.Tk):
                 ('CSV Files', '.csv'),
                 ('Text Files', '.txt')
             ])
+        df = pd.read_csv('temporary.txt')
+        print(df)
         print(os.path.basename(self.file))
-        for i in range(len(self.timelist)):
+        for i in range(len(self.list)):
             newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i]]
             self.totallist.append(newentry)
 
