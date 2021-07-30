@@ -59,7 +59,7 @@ class controller(tk.Tk):
         self.rgbvalue = 0
         self.DataTable = np.zeros((10, 9))
 
-        self.LJ = u6.U6()
+        #self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -469,7 +469,6 @@ class controller(tk.Tk):
                 self.DataTable[self.j, 8] = self.flowrate
 
                 print(self.DataTable)
-
 
                 self.goldline.set_xdata(np.append(self.goldline.get_xdata(), self.time))
                 self.goldline.set_ydata(np.append(self.goldline.get_ydata(), self.GoldProbeTemp))
