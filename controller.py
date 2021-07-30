@@ -45,6 +45,8 @@ class controller(tk.Tk):
         self.time = -1
         self.j = -1
 
+        self.tempfileheader = ['Time','Gold Probe Temperature','Stainless Steel Probe Temperature','Radical Density','Convectron Pressure','BaratronPressure','Ion Gauge Pressure','Plasma Power','Flow Rate']
+
         self.temporaryfile = 'temporary.csv'
 
         self.s = ttk.Style()
@@ -273,6 +275,11 @@ class controller(tk.Tk):
 
     def startscan(self):
         print('button pressed')
+        tempfile=open('temporary.csv', 'w')
+        tempfile.truncate(0)
+        tempfilewriter = csv.writer(tempfile)
+        tempfilewriter.writerow(self.tempfileheader)
+        tempfile.close()
         if self.flowrate == 'None Logged' and self.plasmapower == 'None Logged':
             tk.messagebox.showinfo('Log Power','There is no logged plasma power or flow rate.')
 
@@ -306,6 +313,10 @@ class controller(tk.Tk):
         self.StartScan.grid(row=0, columnspan=2, sticky='ew')
         self.ExportData['state']='normal'
         self.ResetPlot['state']='normal'
+        df = pd.read_csv('temporary.csv')
+        print('RD:',df['Radical Density'])
+        print('CP:', df['Convectron Pressure'])
+        print(df)
 
     def logpower(self):
         self.plasmapower = self.PowerEntry.get()
@@ -397,14 +408,14 @@ class controller(tk.Tk):
         self.after(500, self.rgbmode)
 
     def scanning(self):
-        with open('temporary.txt', 'a') as file:
+        with open('temporary.csv', 'a') as file:
             if running:
                 tick = time.time()
                 self.time += 1
                 self.j += 1
                 if self.j == 10:
                     self.j = 0
-                    np.savetxt(file, self.DataTable)
+                    np.savetxt(file, self.DataTable, delimiter=',')
                     self.DataTable = np.zeros((10,9))
 
                 self.temperatures = RadicalTemps(self.LJ, 0, 1)
@@ -515,19 +526,6 @@ class controller(tk.Tk):
         except UnboundLocalError:
             self.after(1000, self.scanning)
 
-    def exportdata(self):
-        self.totallist = []
-        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature', 'Radical Density']
-        for i in range(len(self.list)):
-            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i]]
-            self.totallist.append(newentry)
-        print(self.totallist)
-        with open('TemperatureList.csv', 'a') as templist:
-            writer = csv.writer(templist)
-
-            writer.writerow(self.fields)
-            writer.writerows(self.totallist)
-
     def choosefile(self):
         self.totallist = []
         self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature', 'Radical Density' 'Convectron Pressure', 'Baratron Pressure', 'Ion Gauge Pressure', 'Plasma Power', 'Flow Rate']
@@ -538,9 +536,17 @@ class controller(tk.Tk):
                 ('CSV Files', '.csv'),
                 ('Text Files', '.txt')
             ])
-        df = pd.read_csv('temporary.txt')
-        print(df)
-        print(os.path.basename(self.file))
+
+        self.timelist = df['Time'].tolist()
+        self.GoldProbeTempList = df['Gold Probe Temperature'].tolist()
+        self.SSProbeTempList = df['Stainless Steel Probe Temperature'].tolist()
+        self.PlasmaPowerList = df['Plasma Power'].tolist()
+        self.FlowRateList = df['Flow Rate'].tolist()
+        self.ConvectronPressureList = df['Convectron Pressure'].tolist()
+        self.BaratronPressureList = df['Baratron Pressure'].tolist()
+        self.IonGaugePressureList = df['Ion Gauge Pressure'].tolist()
+        self.RadicalDensityList = df['Radical Density'].tolist()
+
         for i in range(len(self.timelist)):
             newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i]]
             self.totallist.append(newentry)
@@ -562,8 +568,6 @@ class controller(tk.Tk):
         self.ConvectronPressureList.clear()
         self.BaratronPressureList.clear()
         self.IonGaugePressureList.clear()
-
-        print(self.list)
 
 if __name__ == '__main__':
     app = controller()
