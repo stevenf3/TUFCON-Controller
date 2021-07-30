@@ -18,6 +18,7 @@ import matplotlib.colors
 from tkintercolorlist import *
 import random
 import time
+from conbarconversion import *
 #from colour import Color
 
 running = False
