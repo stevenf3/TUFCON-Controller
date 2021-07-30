@@ -18,6 +18,7 @@ import matplotlib.colors
 from tkintercolorlist import *
 import random
 import time
+from conbarconversion import *
 #from colour import Color
 
 running = False
@@ -443,7 +444,7 @@ class controller(tk.Tk):
                 self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
                 self.RadicalDensity['text'] = "{:0.3e}".format(self.RadicalDensityValue)
 
-                self.ConvectronPressureValue = CorrectedConvectronPressure(self.LJ, 2)
+                self.ConvectronPressureValue = correct(ConvectronPressure(self.LJ, 2))
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
 
                 self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
@@ -468,15 +469,13 @@ class controller(tk.Tk):
                 self.DataTable[self.j, 7] = self.plasmapower
                 self.DataTable[self.j, 8] = self.flowrate
 
-                print(self.DataTable)
-
-
                 self.goldline.set_xdata(np.append(self.goldline.get_xdata(), self.time))
                 self.goldline.set_ydata(np.append(self.goldline.get_ydata(), self.GoldProbeTemp))
                 self.ssline.set_xdata(np.append(self.ssline.get_xdata(), self.time))
                 self.ssline.set_ydata(np.append(self.ssline.get_ydata(), self.SSProbeTemp))
                 self.plot1.relim()
                 self.plot1.autoscale_view()
+                print(self.GoldProbeTemp, self.SSProbeTemp)
 
                 self.goldline60.set_xdata(np.append(self.goldline60.get_xdata(), self.time))
                 self.goldline60.set_ydata(np.append(self.goldline60.get_ydata(), self.GoldProbeTemp))
@@ -504,7 +503,7 @@ class controller(tk.Tk):
                 self.plot5.relim()
                 self.plot5.autoscale_view()
                 #self.plot5.set_yscale('log')
-
+                print(self.ConvectronPressureValue,self.BaratronPressureValue)
                 self.pressureline60.set_xdata(np.append(self.pressureline60.get_xdata(), self.time))
                 self.pressureline60.set_ydata(np.append(self.pressureline60.get_ydata(), self.ConvectronPressureValue))
                 self.plot6.relim()
@@ -514,7 +513,9 @@ class controller(tk.Tk):
 
                 if self.time  >= 2:
                     self.plot5.set_yscale('log')
+                    self.plot5.relim()
                     self.plot6.set_yscale('log')
+                    self.plot6.relim()
 
                 self.canvas.draw()
                 self.canvas2.draw()
