@@ -278,6 +278,7 @@ class controller(tk.Tk):
         self.destroy()
 
     def startscan(self):
+        print('button pressed')
         if self.flowrate == 'None Logged' and self.plasmapower == 'None Logged':
             tk.messagebox.showinfo('Log Power','There is no logged plasma power or flow rate.')
 
@@ -460,6 +461,8 @@ class controller(tk.Tk):
                 self.DataTable[self.j, 6] = self.IonGaugePressureValue
                 self.DataTable[self.j, 7] = self.plasmapower
                 self.DataTable[self.j, 8] = self.flowrate
+
+                print(self.DataTable)
 
 
                 self.goldline.set_xdata(np.append(self.line1.get_xdata(), self.time))
