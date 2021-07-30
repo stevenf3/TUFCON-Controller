@@ -493,6 +493,7 @@ class controller(tk.Tk):
 
                 self.radline.set_xdata(np.append(self.radline.get_xdata(), self.time))
                 self.radline.set_ydata(np.append(self.radline.get_ydata(), self.RadicalDensityValue))
+                self.plot3.relim()
                 self.plot3.set_ylim(1e17, self.radmax*5)
                 self.plot3.autoscale_view()
                 #self.plot3.set_yscale('log')
@@ -506,6 +507,7 @@ class controller(tk.Tk):
 
                 self.pressureline.set_xdata(np.append(self.pressureline.get_xdata(), self.time))
                 self.pressureline.set_ydata(np.append(self.pressureline.get_ydata(), self.ConvectronPressureValue))
+                self.plot5.relim()
                 self.plot5.set_ylim(0.0001, self.maxconpressure * 5)
                 self.plot5.autoscale_view()
                 #self.plot5.set_yscale('log')
