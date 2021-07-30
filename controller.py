@@ -17,6 +17,7 @@ from Gauges import *
 import matplotlib.colors
 from tkintercolorlist import *
 import random
+import time
 #from colour import Color
 
 running = False
@@ -128,7 +129,7 @@ class controller(tk.Tk):
         self.plot6 = self.fig3.add_subplot(212, ylim=(0,self.pressureylim2))
         self.plot6.set_xlabel('Time (s)')
         self.plot6.set_ylabel('Pressure (Torr)')
-        self.pressureline, = self.plot6.plot([],[],'purple')
+        self.pressureline60, = self.plot6.plot([],[],'purple')
 
 
         self.canvas = FigureCanvasTkAgg(self.fig1, master=self.frame2)
@@ -424,7 +425,10 @@ class controller(tk.Tk):
                 self.SSProbe['text'] = str(self.SSProbeTemp)
                 self.Difference['text'] = str(self.DifferenceTemp)
 
-                self.xmax2 = self.time
+                if self.time == 0:
+                    self.xmax2 = 1
+                else:
+                    self.xmax2 = self.time
 
                 if self.time <= 60:
                     self.xmax1 = 0
@@ -438,7 +442,6 @@ class controller(tk.Tk):
 
                 self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
                 self.RadicalDensity['text'] = "{:0.3e}".format(self.RadicalDensityValue)
-                self.Radical60 = self.RadicalDensityList[-60:]
 
                 self.ConvectronPressureValue = CorrectedConvectronPressure(self.LJ, 2)
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
@@ -458,56 +461,61 @@ class controller(tk.Tk):
                 self.DataTable[self.j, 3] = self.RadicalDensityValue
                 self.DataTable[self.j, 4] = self.ConvectronPressureValue
                 self.DataTable[self.j, 5] = self.BaratronPressureValue
-                self.DataTable[self.j, 6] = self.IonGaugePressureValue
+                try:
+                    self.DataTable[self.j, 6] = self.IonGaugePressureValue
+                except:
+                    self.DataTable[self.j, 6] = np.nan
                 self.DataTable[self.j, 7] = self.plasmapower
                 self.DataTable[self.j, 8] = self.flowrate
 
                 print(self.DataTable)
 
 
-                self.goldline.set_xdata(np.append(self.line1.get_xdata(), self.time))
-                self.goldline.set_ydata(np.append(self.line1.get_ydata(), self.GoldProbeTemp))
-                self.ssline.set_xdata(np.append(self.line2.get_xdata(), self.time))
-                self.ssline.set_ydata(np.append(self.line2.get_ydata(), self.SSProbeTemp))
+                self.goldline.set_xdata(np.append(self.goldline.get_xdata(), self.time))
+                self.goldline.set_ydata(np.append(self.goldline.get_ydata(), self.GoldProbeTemp))
+                self.ssline.set_xdata(np.append(self.ssline.get_xdata(), self.time))
+                self.ssline.set_ydata(np.append(self.ssline.get_ydata(), self.SSProbeTemp))
                 self.plot1.relim()
                 self.plot1.autoscale_view()
 
-                self.goldline60.set_xdata(np.append(self.line1.get_xdata(), self.time))
-                self.goldline60.set_ydata(np.append(self.line2.get_ydata(), self.GoldProbeTemp))
-                self.ssline60.set_xdata(np.append(self.line1.get_xdata(), self.time))
-                self.ssline60.set_ydata(np.append(self.line2.get_ydata(), self.SSProbeTemp))
+                self.goldline60.set_xdata(np.append(self.goldline60.get_xdata(), self.time))
+                self.goldline60.set_ydata(np.append(self.goldline60.get_ydata(), self.GoldProbeTemp))
+                self.ssline60.set_xdata(np.append(self.ssline60.get_xdata(), self.time))
+                self.ssline60.set_ydata(np.append(self.ssline60.get_ydata(), self.SSProbeTemp))
                 self.plot2.relim()
                 self.plot2.set_xlim(self.xmax1, self.xmax2)
                 self.plot2.autoscale_view()
 
-                self.radline.set_xdata(np.append(self.line2.get_xdata(), self.time))
-                self.radline.set_ydata(np.append(self.line2.get_ydata(), self.RadicalDensityValue))
+                self.radline.set_xdata(np.append(self.radline.get_xdata(), self.time))
+                self.radline.set_ydata(np.append(self.radline.get_ydata(), self.RadicalDensityValue))
                 self.plot3.relim()
                 self.plot3.autoscale_view()
-                self.plot3.set_yscale('log')
+                #self.plot3.set_yscale('log')
 
-                self.radline60.set_xdata(np.append(self.line1.get_xdata(), self.time))
-                self.radline60.set_ydata(np.append(self.line2.get_ydata(), self.RadicalDensityValue))
+                self.radline60.set_xdata(np.append(self.radline60.get_xdata(), self.time))
+                self.radline60.set_ydata(np.append(self.radline60.get_ydata(), self.RadicalDensityValue))
                 self.plot4.relim()
                 self.plot4.set_xlim(self.xmax1, self.xmax2)
                 self.plot4.autoscale_view()
-                self.plot4.set_yscale('log')
+                #self.plot4.set_yscale('log')
 
-                self.pressureline.set_xdata(np.append(self.line2.get_xdata(), self.time))
-                self.pressureline.set_ydata(np.append(self.line2.get_ydata(), self.ConvectronPressure))
+                self.pressureline.set_xdata(np.append(self.pressureline.get_xdata(), self.time))
+                self.pressureline.set_ydata(np.append(self.pressureline.get_ydata(), self.ConvectronPressureValue))
                 self.plot5.relim()
                 self.plot5.autoscale_view()
-                self.plot5.set_yscale('log')
+                #self.plot5.set_yscale('log')
 
-                self.pressureline60.set_xdata(np.append(self.line1.get_xdata(), self.time))
-                self.pressureline60.set_ydata(np.append(self.line2.get_ydata(), self.ConvectronPressureValue))
+                self.pressureline60.set_xdata(np.append(self.pressureline60.get_xdata(), self.time))
+                self.pressureline60.set_ydata(np.append(self.pressureline60.get_ydata(), self.ConvectronPressureValue))
                 self.plot6.relim()
                 self.plot6.set_xlim(self.xmax1, self.xmax2)
                 self.plot6.autoscale_view()
-                self.plot6.set_yscale('log')
+                #self.plot6.set_yscale('log')
 
-                if self.time >= 1:
-                    self.plot
+                if self.time  >= 2:
+                    self.plot5.set_yscale('log')
+                    self.plot6.set_yscale('log')
+
                 self.canvas.draw()
                 self.canvas2.draw()
                 self.canvas3.draw()
