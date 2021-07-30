@@ -515,10 +515,10 @@ class controller(tk.Tk):
 
                 tock = time.time()
                 delay = 1000 * int(tock - tick)
-                try:
-                    self.after(1000 - delay, self.scanning)
-                except UnboundLocalError:
-                    self.after(1000, self.scanning)
+        try:
+            self.after(1000 - delay, self.scanning)
+        except UnboundLocalError:
+            self.after(1000, self.scanning)
 
     def exportdata(self):
         self.totallist = []
