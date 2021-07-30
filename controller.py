@@ -540,7 +540,7 @@ class controller(tk.Tk):
                 ('Text Files', '.txt')
             ])
         print(os.path.basename(self.file))
-        for i in range(len(self.list)):
+        for i in range(len(self.timelist)):
             newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i]]
             self.totallist.append(newentry)
 
