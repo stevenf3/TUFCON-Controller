@@ -71,6 +71,8 @@ class controller(tk.Tk):
         self.pressureylim1 = 850
         self.pressureylim2 = 850
 
+        self.maxconpressure = 0.01
+        self.radmax = 1e19
         self.xmax2 = 1
         self.xmax1 = 0
         self.xmax3 = 0
@@ -444,9 +446,13 @@ class controller(tk.Tk):
 
                 self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
                 self.RadicalDensity['text'] = "{:0.3e}".format(self.RadicalDensityValue)
+                if self.RadicalDensityValue >= self.radmax:
+                    self.radmax = self.RadicalDensityValue
 
                 self.ConvectronPressureValue = correct(ConvectronPressure(self.LJ, 2))
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
+                if self.ConvectronPressureValue >= self.maxconpressure:
+                    self.maxconpressure = self.ConvectronPressureValue
 
                 self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
                 self.BaratronPressure['text'] = "{:0.3e}".format(self.BaratronPressureValue)
@@ -487,26 +493,26 @@ class controller(tk.Tk):
 
                 self.radline.set_xdata(np.append(self.radline.get_xdata(), self.time))
                 self.radline.set_ydata(np.append(self.radline.get_ydata(), self.RadicalDensityValue))
-                self.plot3.relim()
+                self.plot3.set_ylim(1e17, self.radmax*5)
                 self.plot3.autoscale_view()
                 #self.plot3.set_yscale('log')
 
                 self.radline60.set_xdata(np.append(self.radline60.get_xdata(), self.time))
                 self.radline60.set_ydata(np.append(self.radline60.get_ydata(), self.RadicalDensityValue))
-                self.plot4.relim()
+                self.plot4.set_ylim(1e17, self.radmax*5)
                 self.plot4.set_xlim(self.xmax1, self.xmax2)
                 self.plot4.autoscale_view()
                 #self.plot4.set_yscale('log')
 
                 self.pressureline.set_xdata(np.append(self.pressureline.get_xdata(), self.time))
                 self.pressureline.set_ydata(np.append(self.pressureline.get_ydata(), self.ConvectronPressureValue))
-                self.plot5.relim()
+                self.plot5.set_ylim(0.0001, self.maxconpressure * 5)
                 self.plot5.autoscale_view()
                 #self.plot5.set_yscale('log')
 
                 self.pressureline60.set_xdata(np.append(self.pressureline60.get_xdata(), self.time))
                 self.pressureline60.set_ydata(np.append(self.pressureline60.get_ydata(), self.ConvectronPressureValue))
-                self.plot6.relim()
+                self.plot6.set_ylim(0.0001, self.maxconpressure * 5)
                 self.plot6.set_xlim(self.xmax1, self.xmax2)
                 self.plot6.autoscale_view()
                 #self.plot6.set_yscale('log')
