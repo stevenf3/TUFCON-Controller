@@ -33,10 +33,6 @@ GammaSS = 0.100
 
 color = 'empty'
 
-def ConvectronConversion(x):
-    y = 0.06478 * x**3 - 0.5328*x**2 + 1.3905*x - 1.0742
-    return(y)
-
 class controller(tk.Tk):
     def __init__(self):
         super().__init__()
