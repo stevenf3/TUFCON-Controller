@@ -39,3 +39,7 @@ ax.set_xscale('log')
 ax.plot(x,y)
 ax.plot(conlist, ystarlist)
 plt.show()
+
+def correct(val):
+    correctedpressure = np.interp(val, conlist, barlist)
+    return(correctedpressure)

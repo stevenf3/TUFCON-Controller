@@ -62,7 +62,7 @@ class controller(tk.Tk):
         self.rgbvalue = 0
         self.DataTable = np.zeros((10, 9))
 
-        #self.LJ = u6.U6()
+        self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -485,23 +485,27 @@ class controller(tk.Tk):
                 self.radline.set_ydata(np.append(self.line2.get_ydata(), self.RadicalDensityValue))
                 self.plot3.relim()
                 self.plot3.autoscale_view()
+                self.plot3.set_yscale('log')
 
                 self.radline60.set_xdata(np.append(self.line1.get_xdata(), self.time))
                 self.radline60.set_ydata(np.append(self.line2.get_ydata(), self.RadicalDensityValue))
                 self.plot4.relim()
                 self.plot4.set_xlim(self.xmax1, self.xmax2)
                 self.plot4.autoscale_view()
+                self.plot4.set_yscale('log')
 
                 self.pressureline.set_xdata(np.append(self.line2.get_xdata(), self.time))
                 self.pressureline.set_ydata(np.append(self.line2.get_ydata(), self.ConvectronPressure))
                 self.plot5.relim()
                 self.plot5.autoscale_view()
+                self.plot5.set_yscale('log')
 
                 self.pressureline60.set_xdata(np.append(self.line1.get_xdata(), self.time))
                 self.pressureline60.set_ydata(np.append(self.line2.get_ydata(), self.ConvectronPressureValue))
                 self.plot6.relim()
                 self.plot6.set_xlim(self.xmax1, self.xmax2)
                 self.plot6.autoscale_view()
+                self.plot6.set_yscale('log')
 
                 if self.time >= 1:
                     self.plot
