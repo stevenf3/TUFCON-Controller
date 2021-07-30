@@ -541,7 +541,7 @@ class controller(tk.Tk):
         df = pd.read_csv('temporary.txt')
         print(df)
         print(os.path.basename(self.file))
-        for i in range(len(self.list)):
+        for i in range(len(self.timelist)):
             newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i]]
             self.totallist.append(newentry)
 
@@ -554,7 +554,6 @@ class controller(tk.Tk):
         self.ExportData.grid_forget()
 
     def reset(self):
-        self.list.clear()
         self.timelist.clear()
         self.GoldProbeTempList.clear()
         self.SSProbeTempList.clear()
