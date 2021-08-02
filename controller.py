@@ -195,7 +195,7 @@ class controller(tk.Tk):
         self.ExportData.grid(row=11,columnspan=2,sticky='ew')
 #        self.ExportData.grid_forget()
 
-        self.ResetPlot = ttk.Button(self.frame3, text='Reset Plot', command=self.reset, state=tk.DISABLED)
+        self.ResetPlot = ttk.Button(self.frame3, text='Reset Plot', command=self.resetconfirm, state=tk.DISABLED)
         self.ResetPlot.grid(row=12,columnspan=2,sticky='ew')
 
         self.DarkModeButton = ttk.Button(self.frame2s, text='Dark Mode', command=self.darkmode)
@@ -277,6 +277,14 @@ class controller(tk.Tk):
         self.MatplotColorDropdown = ttk.Combobox(self.frame2s, textvariable=self.selectedFigcolor, values=self.matplotcolorlist)
         self.MatplotColorDropdown.grid(row=3, column=1)
 
+        self.ResetConfirm = ttk.Button(self.frame3, text='Confirm', command=self.reset)
+        self.ResetConfirm.grid()
+        self.ResetConfirm.grid_forget()
+
+        self.ResetCancel = ttk.Button(self.frame3, text='Cancel', command=self.resetcancel)
+        self.ResetConfirm.grid()
+        self.ResetConfirm.grid_forget()
+
     def onclose(self):
         plt.close('all')
         self.destroy()
@@ -314,8 +322,8 @@ class controller(tk.Tk):
         self.ExportData.grid(row=14, columnspan=2, sticky='ew')
         self.ResetPlot.grid(row=15, columnspan=2, sticky='ew')
         self.PowerEntry.grid_forget()
-        self.PowerEntryButton.grid_forget()
-        self.FlowRateEntry.grid_forget()
+        self.PowerEntryButton['state'] = tk.DISABLED
+        self.FlowRateEntry['state'] = tk.DISABLED
         self.FlowRateEntryButton.grid_forget()
         self.StopScan.grid_forget()
         self.StartScan.grid(row=0, columnspan=2, sticky='ew')
@@ -583,19 +591,21 @@ class controller(tk.Tk):
 
         self.ExportData.grid_forget()
 
-    def reset(self):
-        self.timelist.clear()
-        self.GoldProbeTempList.clear()
-        self.SSProbeTempList.clear()
-        self.PlasmaPowerList.clear()
-        self.FlowRateList.clear()
-        self.ConvectronPressureList.clear()
-        self.BaratronPressureList.clear()
-        self.IonGaugePressureList.clear()
-
+    def resetconfirm(self):
         self.ResetPlot.grid_forget()
         self.ResetConfirm.grid(row=12,column=0,columnspan=1,sticky='ew')
         self.ResetCancel.grid(row=12,column=1,columnspan=1,sticky='ew')
+
+    def resetcancel(self):
+        self.ResetConfirm.grid_forget()
+        self.ResetCancel.grid_forget()
+        self.ResetPlot.grid(row=12, columnspan=2,sticky='ew')
+
+    def reset(self):
+        print(reset)
+        self.ResetConfirm.grid_forget()
+        self.ResetCancel.grid_forget()
+        self.ResetPlot.grid(row=12, columnspan=2,sticky='ew')
 
 if __name__ == '__main__':
     app = controller()
