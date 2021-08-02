@@ -593,13 +593,13 @@ class controller(tk.Tk):
 
     def resetconfirm(self):
         self.ResetPlot.grid_forget()
-        self.ResetConfirm.grid(row=12,column=0,columnspan=1,sticky='ew')
-        self.ResetCancel.grid(row=12,column=1,columnspan=1,sticky='ew')
+        self.ResetConfirm.grid(row=15,column=0,columnspan=1,sticky='ew')
+        self.ResetCancel.grid(row=15,column=1,columnspan=1,sticky='ew')
 
     def resetcancel(self):
         self.ResetConfirm.grid_forget()
         self.ResetCancel.grid_forget()
-        self.ResetPlot.grid(row=12, columnspan=2,sticky='ew')
+        self.ResetPlot.grid(row=15, columnspan=2,sticky='ew')
 
     def reset(self):
         print(reset)
