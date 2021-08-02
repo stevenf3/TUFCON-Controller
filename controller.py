@@ -607,6 +607,22 @@ class controller(tk.Tk):
         self.ResetCancel.grid_forget()
         self.ResetPlot.grid(row=12, columnspan=2,sticky='ew')
 
+        self.plot1.remove()
+        self.plot2.remove()
+        self.plot3.remove()
+        self.plot4.remove()
+        self.plot5.remove()
+        self.plot6.remove()
+
+        self.canvas.draw()
+        self.canvas2.draw()
+        self.canvas3.draw()
+
+        resetfile=open('temporary.csv', 'w')
+        resetfile.truncate(0)
+
+        self.DataTable = np.zeros((10, 9))
+
 
 if __name__ == '__main__':
     app = controller()
