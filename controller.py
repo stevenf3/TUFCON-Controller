@@ -193,10 +193,10 @@ class controller(tk.Tk):
 
         self.ExportData = ttk.Button(self.frame3, text='Export Data', command=self.choosefile, state=tk.DISABLED)
         self.ExportData.grid(row=11,columnspan=2,sticky='ew')
-#        self.ExportData.grid_forget()
+        self.ExportData.grid_forget()
 
         self.ResetPlot = ttk.Button(self.frame3, text='Reset Plot', command=self.resetconfirm, state=tk.DISABLED)
-        self.ResetPlot.grid(row=15,columnspan=2,sticky='ew')
+        self.ResetPlot.grid(row=12,columnspan=2,sticky='ew')
 
         self.DarkModeButton = ttk.Button(self.frame2s, text='Dark Mode', command=self.darkmode)
         self.DarkModeButton.grid(row=0, columnspan=2, sticky='ew')
@@ -321,10 +321,10 @@ class controller(tk.Tk):
         running = False
         self.ExportData.grid(row=14, columnspan=2, sticky='ew')
         self.ResetPlot.grid(row=15, columnspan=2, sticky='ew')
-        self.PowerEntry['state'] = tk.DISABLED
+        self.PowerEntry.grid_forget()
         self.PowerEntryButton['state'] = tk.DISABLED
         self.FlowRateEntry['state'] = tk.DISABLED
-        self.FlowRateEntryButton['state'] = tk.DISABLED
+        self.FlowRateEntryButton.grid_forget()
         self.StopScan.grid_forget()
         self.StartScan.grid(row=0, columnspan=2, sticky='ew')
         self.ExportData['state']='normal'
@@ -606,6 +606,7 @@ class controller(tk.Tk):
         self.ResetConfirm.grid_forget()
         self.ResetCancel.grid_forget()
         self.ResetPlot.grid(row=12, columnspan=2,sticky='ew')
+
 
 if __name__ == '__main__':
     app = controller()
