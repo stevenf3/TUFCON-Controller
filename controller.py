@@ -167,7 +167,7 @@ class controller(tk.Tk):
         self.RadicalDensity.grid(row=0,column=1, sticky='ew')
 
         self.StartScan = ttk.Button(self.frame3, text='Start Scan', command=self.startscan)
-        self.StartScan.grid(row=0, sticky='ew')
+        self.StartScan.grid(row=0,column=0,columnspan=2, sticky='ew')
 
         self.StopScan = ttk.Button(self.frame3, text='Stop Scan', command=self.stopscan)
         self.StopScan.grid(row=1, sticky='ew')
@@ -192,11 +192,12 @@ class controller(tk.Tk):
         self.Difference.grid(row=3,column=1, sticky='ew')
 
         self.ExportData = ttk.Button(self.frame3, text='Export Data', command=self.choosefile, state=tk.DISABLED)
-        self.ExportData.grid(row=11,columnspan=2,sticky='ew')
+        self.ExportData.grid(row=11,column=0,columnspan=2,sticky='ew')
         self.ExportData.grid_forget()
 
         self.ResetPlot = ttk.Button(self.frame3, text='Reset Plot', command=self.resetconfirm, state=tk.DISABLED)
-        self.ResetPlot.grid(row=12,columnspan=2,sticky='ew')
+        self.ResetPlot.grid(row=15,column=0,columnspan=2,sticky='ew')
+        self.ResetPlot.grid_forget()
 
         self.DarkModeButton = ttk.Button(self.frame2s, text='Dark Mode', command=self.darkmode)
         self.DarkModeButton.grid(row=0, columnspan=2, sticky='ew')
@@ -235,16 +236,16 @@ class controller(tk.Tk):
         self.FlowRate.grid(row=8,column=1,sticky='ew')
 
         self.PowerEntry = ttk.Entry(self.frame3)
-        self.PowerEntry.grid(row=6, columnspan=2,sticky='ew')
+        self.PowerEntry.grid(row=6,column=0, columnspan=2,sticky='ew')
 
         self.PowerEntryButton = ttk.Button(self.frame3, text='Log Plasma Power (W)', command=self.logpower)
-        self.PowerEntryButton.grid(row=7)
+        self.PowerEntryButton.grid(row=7,column=0,columnspan=2,sticky='ew')
 
         self.FlowRateEntry = ttk.Entry(self.frame3)
-        self.FlowRateEntry.grid(row=8, columnspan=2,sticky='ew')
+        self.FlowRateEntry.grid(row=8,column=0, columnspan=2,sticky='ew')
 
         self.FlowRateEntryButton = ttk.Button(self.frame3, text='Log Flow Rate (sccm)', command=self.logflow)
-        self.FlowRateEntryButton.grid(row=9, columnspan=2,sticky='ew')
+        self.FlowRateEntryButton.grid(row=9,column=0, columnspan=2,sticky='ew')
 
         self.selectedBGcolor = tk.StringVar()
         self.selectedTextcolor = tk.StringVar()
@@ -278,11 +279,11 @@ class controller(tk.Tk):
         self.MatplotColorDropdown.grid(row=3, column=1)
 
         self.ResetConfirm = ttk.Button(self.frame3, text='Confirm', command=self.reset)
-        self.ResetConfirm.grid()
+        self.ResetConfirm.grid(row=15, column=0, columnspan=1)
         self.ResetConfirm.grid_forget()
 
         self.ResetCancel = ttk.Button(self.frame3, text='Cancel', command=self.resetcancel)
-        self.ResetConfirm.grid()
+        self.ResetConfirm.grid(row=15, column=1, columnspan=1)
         self.ResetConfirm.grid_forget()
 
     def onclose(self):
@@ -309,10 +310,10 @@ class controller(tk.Tk):
             running = True
             self.StartScan.grid_forget()
             self.StopScan.grid(row=0, columnspan=2,sticky='ew')
-            self.PowerEntry.grid(row=6, columnspan=2,sticky='ew')
-            self.PowerEntryButton.grid(row=7,columnspan=2,sticky='ew')
-            self.FlowRateEntry.grid(row=8, columnspan=2,sticky='ew')
-            self.FlowRateEntryButton.grid(row=9,columnspan=2,sticky='ew')
+            self.PowerEntry['state']='normal'
+            self.PowerEntryButton['state']='normal'
+            self.FlowRateEntry['state']='normal'
+            self.FlowRateEntryButton['state']='normal'
             self.ExportData['state']=tk.DISABLED
             self.ResetPlot['state']=tk.DISABLED
 
@@ -321,10 +322,10 @@ class controller(tk.Tk):
         running = False
         self.ExportData.grid(row=14, columnspan=2, sticky='ew')
         self.ResetPlot.grid(row=15, columnspan=2, sticky='ew')
-        self.PowerEntry.grid_forget()
+        self.PowerEntry['state'] = tk.DISABLED
         self.PowerEntryButton['state'] = tk.DISABLED
         self.FlowRateEntry['state'] = tk.DISABLED
-        self.FlowRateEntryButton.grid_forget()
+        self.FlowRateEntryButton['state'] = tk.DISABLED
         self.StopScan.grid_forget()
         self.StartScan.grid(row=0, columnspan=2, sticky='ew')
         self.ExportData['state']='normal'
@@ -602,17 +603,48 @@ class controller(tk.Tk):
         self.ResetPlot.grid(row=15, columnspan=2,sticky='ew')
 
     def reset(self):
-        print(reset)
         self.ResetConfirm.grid_forget()
         self.ResetCancel.grid_forget()
-        self.ResetPlot.grid(row=12, columnspan=2,sticky='ew')
+        self.ExportData.grid(row=14, columnspan=2,sticky='ew')
+        self.ResetPlot.grid(row=15, columnspan=2,sticky='ew')
 
         self.plot1.remove()
+        self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
+        self.plot1.set_xlabel('Time (s)')
+        self.plot1.set_ylabel('Temperature (deg C)')
+        self.goldline, = self.plot1.plot([],[],'orange')
+        self.ssline, = self.plot1.plot([],[],'blue')
+
         self.plot2.remove()
+        self.plot2 = self.fig1.add_subplot(212, ylim=(0, self.maxlim1))
+        self.plot2.set_xlabel('Time (s)')
+        self.plot2.set_ylabel('Temperature (deg C)')
+        self.goldline60, = self.plot2.plot([],[],'orange')
+        self.ssline60, = self.plot2.plot([],[],'blue')
+
         self.plot3.remove()
+        self.plot3 = self.fig2.add_subplot(211, ylim=(0,self.maxlim3))
+        self.plot3.set_xlabel('Time (s)')
+        self.plot3.set_ylabel('Radical Density')
+        self.radline, = self.plot3.plot([],[],'green')
+
         self.plot4.remove()
+        self.plot4 = self.fig2.add_subplot(212, ylim=(0,self.maxlim4))
+        self.plot4.set_xlabel('Time (s)')
+        self.plot4.set_ylabel('Radical Density')
+        self.radline60, = self.plot4.plot([],[],'green')
+
         self.plot5.remove()
+        self.plot5 = self.fig3.add_subplot(211, ylim=(0,self.pressureylim1))
+        self.plot5.set_xlabel('Time (s)')
+        self.plot5.set_ylabel('Pressure (Torr)')
+        self.pressureline, = self.plot5.plot([],[],'purple')
+
         self.plot6.remove()
+        self.plot6 = self.fig3.add_subplot(212, ylim=(0,self.pressureylim2))
+        self.plot6.set_xlabel('Time (s)')
+        self.plot6.set_ylabel('Pressure (Torr)')
+        self.pressureline60, = self.plot6.plot([],[],'purple')
 
         self.canvas.draw()
         self.canvas2.draw()
@@ -622,6 +654,8 @@ class controller(tk.Tk):
         resetfile.truncate(0)
 
         self.DataTable = np.zeros((10, 9))
+
+        self.time = 0
 
 
 if __name__ == '__main__':
