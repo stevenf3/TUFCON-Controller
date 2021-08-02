@@ -62,7 +62,7 @@ class controller(tk.Tk):
         self.rgbvalue = 0
         self.DataTable = np.zeros((10, 9))
 
-    #    self.LJ = u6.U6()
+        self.LJ = u6.U6()
 
         self.red = Color('red')
         self.blue = Color('blue')
