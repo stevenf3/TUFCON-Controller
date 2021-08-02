@@ -40,11 +40,12 @@ class ColorCycle(tk.Tk):
         self.Frame = ttk.Frame(self)
         self.Frame.grid(column=0,row=0,sticky='news')
 
+        self.toggle = 0
         self.s = ttk.Style()
         self.red = Color('red')
         self.blue = Color('blue')
-        self.colorsRB = list(self.red.range_to(Color('blue'),12))
-        self.colorsBR = list(self.blue.range_to(Color('red'),12))
+        self.colorsRB = list(self.red.range_to(Color('blue'),144))
+        self.colorsBR = list(self.blue.range_to(Color('red'),144))
         self.colorsRB.append(self.colorsBR)
 
 
@@ -63,17 +64,24 @@ class ColorCycle(tk.Tk):
         self.cyclebutton = ttk.Button(self.Frame, text='cycle', command=self.rgbcycle)
         self.cyclebutton.pack()
 
+
     def rgbcycle(self):
-        tick = time.time()
-        for color in self.colorsRB:
-            try:
-                self.fig1.set_facecolor(str(color))
-                self.canvas.draw()
-                sleep(0.05)
-            except:
-                continue
-        tock = time.time()
-        print(tock-tick)
+        if self.toggle == 0:
+            self.toggle = 1
+            for color in self.colorsRB:
+                try:
+                    self.fig1.set_facecolor(str(color))
+                    self.canvas.draw()
+                    sleep(0.05)
+                except:
+                    print('badcolor', color)
+                    continue
+
+        if self.toggle == 1:
+            self.toggle = 0
+            print('done')
+
+        self.after(50, self.rgbcycle)
 
     def onclose(self):
         plt.close('all')

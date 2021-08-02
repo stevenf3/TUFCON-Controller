@@ -19,7 +19,7 @@ from tkintercolorlist import *
 import random
 import time
 from conbarconversion import *
-#from colour import Color
+from colour import Color
 
 running = False
 rgbon = False
@@ -62,7 +62,13 @@ class controller(tk.Tk):
         self.rgbvalue = 0
         self.DataTable = np.zeros((10, 9))
 
-        self.LJ = u6.U6()
+    #    self.LJ = u6.U6()
+
+        self.red = Color('red')
+        self.blue = Color('blue')
+        self.colorsRB = list(self.red.range_to(Color('blue'),12))
+        self.colorsBR = list(self.blue.range_to(Color('red'),12))
+        self.colorsRB.append(self.colorsBR)
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -195,7 +201,7 @@ class controller(tk.Tk):
         self.DarkModeButton = ttk.Button(self.frame2s, text='Dark Mode', command=self.darkmode)
         self.DarkModeButton.grid(row=0, columnspan=2, sticky='ew')
 
-        self.RGBButton = ttk.Button(self.frame2s, text='Gamer Mode', command=self.startrgb)
+        self.RGBButton = ttk.Button(self.frame2s, text='Gamer Mode', command=self.rgbcycle)
         self.RGBButton.grid(row=0, column=2, columnspan=2,sticky='ew')
 
         self.ConvectronPressureLabel = ttk.Label(self.frame1, text='Convectron Pressure (Torr):')
@@ -409,6 +415,16 @@ class controller(tk.Tk):
 
         self.after(500, self.rgbmode)
 
+    def rgbcycle(self):
+        global rgbon
+        if self.rgbvalue == 0:
+            self.rgbvalue = 1
+            rgbon = True
+
+        elif self.rgbvalue == 1:
+            self.rgbvalue = 0
+            rgbon = False
+
     def scanning(self):
         with open('temporary.csv', 'a') as file:
             if running:
@@ -576,6 +592,10 @@ class controller(tk.Tk):
         self.ConvectronPressureList.clear()
         self.BaratronPressureList.clear()
         self.IonGaugePressureList.clear()
+
+        self.ResetPlot.grid_forget()
+        self.ResetConfirm.grid(row=12,column=0,columnspan=1,sticky='ew')
+        self.ResetCancel.grid(row=12,column=1,columnspan=1,sticky='ew')
 
 if __name__ == '__main__':
     app = controller()
