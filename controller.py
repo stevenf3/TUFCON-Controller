@@ -17,11 +17,13 @@ from Gauges import *
 import matplotlib.colors
 from tkintercolorlist import *
 import random
+import time
 from conbarconversion import *
-#from colour import Color
+from colour import Color
 
 running = False
 rgbon = False
+randon = False
 WD = 7.18 * (10**-19) ##J/molecule, dissociation energy
 L = 6.35 * (10**-3) ##m length of exposed probe
 D = 0.508 * (10**-3) ##m (diameter of probe)
@@ -34,10 +36,6 @@ GammaSS = 0.100
 
 color = 'empty'
 
-def ConvectronConversion(x):
-    y = 0.06478 * x**3 - 0.5328*x**2 + 1.3905*x - 1.0742
-    return(y)
-
 class controller(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -45,24 +43,14 @@ class controller(tk.Tk):
         self.plasmapower = 'None Logged'
         self.flowrate = 'None Logged'
 
-        #self.red = Color('red')
-        #self.blue = Color('blue')
-        #self.colorlist = list(self.red.range_to(Color('blue'),65))
-        #self.colorlistBR = list(self.blue.range_to(Color('red'),65))
+        self.time = -1
+        self.j = -1
+        self.coloriter = -1
 
-        #self.colorlist.append(self.colorlistBR[0])
-        #print(self.colorlist)
+        self.tempfileheader = ['Time','Gold Probe Temperature','Stainless Steel Probe Temperature','Radical Density','Convectron Pressure','BaratronPressure','Ion Gauge Pressure','Plasma Power','Flow Rate']
 
-        self.list =[]
-        self.timelist = []
-        self.GoldProbeTempList = []
-        self.SSProbeTempList = []
-        self.RadicalDensityList = []
-        self.ConvectronPressureList = []
-        self.BaratronPressureList = []
-        self.IonGaugePressureList = []
-        self.PlasmaPowerList = []
-        self.FlowRateList = []
+        self.temporaryfile = 'temporary.csv'
+
         self.s = ttk.Style()
         self.s.configure('.', font=('Cambria'), fontsize=16)
         self.s.configure('TButton')
@@ -74,8 +62,27 @@ class controller(tk.Tk):
 
         self.tkintercolorlist = tkintercolorlist()
         self.rgbvalue = 0
+        self.randvalue = 0
+        self.DataTable = np.zeros((10, 9))
 
-        self.LJ = u6.U6()
+        self.red = Color('red')
+        self.colorcycle = list(self.red.range_to(Color('blue'),288))
+
+        for color in reversed(self.colorcycle):
+            self.colorcycle.append(color)
+        excludedcolorindex = []
+        for i in range(len(self.colorcycle)):
+            if len(str(self.colorcycle[i])) != 7:
+                excludedcolorindex.append(i)
+
+        print(len(excludedcolorindex))
+        for excolor in reversed(excludedcolorindex):
+            self.colorcycle.pop(excolor)
+
+        print(len(self.colorcycle))
+
+
+        #self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -84,6 +91,8 @@ class controller(tk.Tk):
         self.pressureylim1 = 850
         self.pressureylim2 = 850
 
+        self.maxconpressure = 0.01
+        self.radmax = 1e19
         self.xmax2 = 1
         self.xmax1 = 0
         self.xmax3 = 0
@@ -92,10 +101,8 @@ class controller(tk.Tk):
         self.frame1 = ttk.Frame(self)
         self.frame1.grid(column=0, row=0, sticky='news')
 
-
         self.notebook = ttk.Notebook(self)
         self.notebook.grid(column=1, row=0, sticky='news')
-
 
         self.frame2 = ttk.Frame(self.notebook)
         self.notebook.add(self.frame2, text='Temperatures')
@@ -116,26 +123,36 @@ class controller(tk.Tk):
         self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
         self.plot1.set_xlabel('Time (s)')
         self.plot1.set_ylabel('Temperature (deg C)')
+        self.goldline, = self.plot1.plot([],[],'orange')
+        self.ssline, = self.plot1.plot([],[],'blue')
+
         self.plot2 = self.fig1.add_subplot(212, ylim=(0, self.maxlim1))
         self.plot2.set_xlabel('Time (s)')
         self.plot2.set_ylabel('Temperature (deg C)')
+        self.goldline60, = self.plot2.plot([],[],'orange')
+        self.ssline60, = self.plot2.plot([],[],'blue')
 
         self.fig2 = Figure(figsize=(5,5), dpi=100)
         self.plot3 = self.fig2.add_subplot(211, ylim=(0,self.maxlim3))
         self.plot3.set_xlabel('Time (s)')
         self.plot3.set_ylabel('Radical Density')
+        self.radline, = self.plot3.plot([],[],'green')
+
         self.plot4 = self.fig2.add_subplot(212, ylim=(0,self.maxlim4))
         self.plot4.set_xlabel('Time (s)')
         self.plot4.set_ylabel('Radical Density')
+        self.radline60, = self.plot4.plot([],[],'green')
 
         self.fig3 = Figure(figsize=(5,5), dpi=100)
         self.plot5 = self.fig3.add_subplot(211, ylim=(0,self.pressureylim1))
         self.plot5.set_xlabel('Time (s)')
         self.plot5.set_ylabel('Pressure (Torr)')
+        self.pressureline, = self.plot5.plot([],[],'purple')
+
         self.plot6 = self.fig3.add_subplot(212, ylim=(0,self.pressureylim2))
         self.plot6.set_xlabel('Time (s)')
         self.plot6.set_ylabel('Pressure (Torr)')
-
+        self.pressureline60, = self.plot6.plot([],[],'purple')
 
         self.canvas = FigureCanvasTkAgg(self.fig1, master=self.frame2)
         self.canvas.draw()
@@ -164,7 +181,7 @@ class controller(tk.Tk):
         self.RadicalDensity.grid(row=0,column=1, sticky='ew')
 
         self.StartScan = ttk.Button(self.frame3, text='Start Scan', command=self.startscan)
-        self.StartScan.grid(row=0, sticky='ew')
+        self.StartScan.grid(row=0,column=0,columnspan=2, sticky='ew')
 
         self.StopScan = ttk.Button(self.frame3, text='Stop Scan', command=self.stopscan)
         self.StopScan.grid(row=1, sticky='ew')
@@ -189,17 +206,21 @@ class controller(tk.Tk):
         self.Difference.grid(row=3,column=1, sticky='ew')
 
         self.ExportData = ttk.Button(self.frame3, text='Export Data', command=self.choosefile, state=tk.DISABLED)
-        self.ExportData.grid(row=11,columnspan=2,sticky='ew')
-#        self.ExportData.grid_forget()
+        self.ExportData.grid(row=11,column=0,columnspan=2,sticky='ew')
+        self.ExportData.grid_forget()
 
-        self.ResetPlot = ttk.Button(self.frame3, text='Reset Plot', command=self.reset, state=tk.DISABLED)
-        self.ResetPlot.grid(row=12,columnspan=2,sticky='ew')
+        self.ResetPlot = ttk.Button(self.frame3, text='Reset Plot', command=self.resetconfirm, state=tk.DISABLED)
+        self.ResetPlot.grid(row=15,column=0,columnspan=2,sticky='ew')
+        self.ResetPlot.grid_forget()
 
         self.DarkModeButton = ttk.Button(self.frame2s, text='Dark Mode', command=self.darkmode)
-        self.DarkModeButton.grid(row=0, columnspan=2, sticky='ew')
+        self.DarkModeButton.grid(row=0,column=0, columnspan=1, sticky='ew')
 
-        self.RGBButton = ttk.Button(self.frame2s, text='Gamer Mode', command=self.startrgb)
-        self.RGBButton.grid(row=0, column=2, columnspan=2,sticky='ew')
+        self.RGBButton = ttk.Button(self.frame2s, text='RGB Mode', command=self.startrgb)
+        self.RGBButton.grid(row=0, column=2, columnspan=1,sticky='ew')
+
+        self.RandButton = ttk.Button(self.frame2s, text='Random Mode', command=self.startrand)
+        self.RandButton.grid(row=0, column=1, columnspan=1,sticky='ew')
 
         self.ConvectronPressureLabel = ttk.Label(self.frame1, text='Convectron Pressure (Torr):')
         self.ConvectronPressureLabel.grid(row=4, column=0,sticky='ew')
@@ -232,23 +253,16 @@ class controller(tk.Tk):
         self.FlowRate.grid(row=8,column=1,sticky='ew')
 
         self.PowerEntry = ttk.Entry(self.frame3)
-        self.PowerEntry.grid(row=6, columnspan=2,sticky='ew')
+        self.PowerEntry.grid(row=6,column=0, columnspan=2,sticky='ew')
 
         self.PowerEntryButton = ttk.Button(self.frame3, text='Log Plasma Power (W)', command=self.logpower)
-        self.PowerEntryButton.grid(row=7)
+        self.PowerEntryButton.grid(row=7,column=0,columnspan=2,sticky='ew')
 
         self.FlowRateEntry = ttk.Entry(self.frame3)
-        self.FlowRateEntry.grid(row=8, columnspan=2,sticky='ew')
+        self.FlowRateEntry.grid(row=8,column=0, columnspan=2,sticky='ew')
 
         self.FlowRateEntryButton = ttk.Button(self.frame3, text='Log Flow Rate (sccm)', command=self.logflow)
-        self.FlowRateEntryButton.grid(row=9, columnspan=2,sticky='ew')
-
-#        self.LabelList= [self.RadicalDensityLabel, self.RadicalDensity, self.GoldProbeLabel,
-#        self.GoldProbe, self.SSProbeLabel, self.SSProbe, self.DifferenceLabel,
-#        self.Difference, self.ConvectronPressureLabel, self.ConvectronPressure,
-#        self.BaratronPressureLabel,self.BaratronPressure,
-#        self.IonGaugePressureLabel, self.IonGaugePressure, self.PlasmaPowerLabel,
-#        self.PlasmaPower, self.FlowRateLabel, self.FlowRate]
+        self.FlowRateEntryButton.grid(row=9,column=0, columnspan=2,sticky='ew')
 
         self.selectedBGcolor = tk.StringVar()
         self.selectedTextcolor = tk.StringVar()
@@ -275,25 +289,31 @@ class controller(tk.Tk):
         self.FigureColor = ttk.Label(self.frame2s, text='Figure Background Color:')
         self.FigureColor.grid(row=3, column=0,sticky='ew')
 
-    #    self.FigureColorEntry = ttk.Entry(self.frame2s)
-    #    self.FigureColorEntry.grid(row=3, column=1, sticky='ew')
-
         self.ChangeFigureColorButton = ttk.Button(self.frame2s, text='Change',command=self.changefigurecolor)
         self.ChangeFigureColorButton.grid(row=3, column=2)
-
 
         self.MatplotColorDropdown = ttk.Combobox(self.frame2s, textvariable=self.selectedFigcolor, values=self.matplotcolorlist)
         self.MatplotColorDropdown.grid(row=3, column=1)
 
+        self.ResetConfirm = ttk.Button(self.frame3, text='Confirm', command=self.reset)
+        self.ResetConfirm.grid(row=15, column=0, columnspan=1)
+        self.ResetConfirm.grid_forget()
 
-
-
+        self.ResetCancel = ttk.Button(self.frame3, text='Cancel', command=self.resetcancel)
+        self.ResetConfirm.grid(row=15, column=1, columnspan=1)
+        self.ResetConfirm.grid_forget()
 
     def onclose(self):
         plt.close('all')
         self.destroy()
 
     def startscan(self):
+        print('button pressed')
+        tempfile=open('temporary.csv', 'w')
+        tempfile.truncate(0)
+        tempfilewriter = csv.writer(tempfile)
+        tempfilewriter.writerow(self.tempfileheader)
+        tempfile.close()
         if self.flowrate == 'None Logged' and self.plasmapower == 'None Logged':
             tk.messagebox.showinfo('Log Power','There is no logged plasma power or flow rate.')
 
@@ -307,10 +327,10 @@ class controller(tk.Tk):
             running = True
             self.StartScan.grid_forget()
             self.StopScan.grid(row=0, columnspan=2,sticky='ew')
-            self.PowerEntry.grid(row=6, columnspan=2,sticky='ew')
-            self.PowerEntryButton.grid(row=7,columnspan=2,sticky='ew')
-            self.FlowRateEntry.grid(row=8, columnspan=2,sticky='ew')
-            self.FlowRateEntryButton.grid(row=9,columnspan=2,sticky='ew')
+            self.PowerEntry['state']='normal'
+            self.PowerEntryButton['state']='normal'
+            self.FlowRateEntry['state']='normal'
+            self.FlowRateEntryButton['state']='normal'
             self.ExportData['state']=tk.DISABLED
             self.ResetPlot['state']=tk.DISABLED
 
@@ -319,14 +339,18 @@ class controller(tk.Tk):
         running = False
         self.ExportData.grid(row=14, columnspan=2, sticky='ew')
         self.ResetPlot.grid(row=15, columnspan=2, sticky='ew')
-        self.PowerEntry.grid_forget()
-        self.PowerEntryButton.grid_forget()
-        self.FlowRateEntry.grid_forget()
-        self.FlowRateEntryButton.grid_forget()
+        self.PowerEntry['state'] = tk.DISABLED
+        self.PowerEntryButton['state'] = tk.DISABLED
+        self.FlowRateEntry['state'] = tk.DISABLED
+        self.FlowRateEntryButton['state'] = tk.DISABLED
         self.StopScan.grid_forget()
         self.StartScan.grid(row=0, columnspan=2, sticky='ew')
         self.ExportData['state']='normal'
         self.ResetPlot['state']='normal'
+        df = pd.read_csv('temporary.csv')
+        print('RD:',df['Radical Density'])
+        print('CP:', df['Convectron Pressure'])
+        print(df)
 
     def logpower(self):
         self.plasmapower = self.PowerEntry.get()
@@ -385,8 +409,16 @@ class controller(tk.Tk):
             self.canvas2.draw()
             self.canvas3.draw()
             self.DarkModeButton['text'] = 'Dark Mode'
-            #for label in self.LabelList:
-            #    label['background']='gray23'
+
+    def startrand(self):
+        global randon
+        if self.randvalue == 0:
+            self.randvalue = 1
+            randon = True
+
+        elif self.randvalue == 1:
+            self.randvalue = 0
+            randon = False
 
     def startrgb(self):
         global rgbon
@@ -398,9 +430,14 @@ class controller(tk.Tk):
             self.rgbvalue = 0
             rgbon = False
 
+        self.s.configure('TFrame', background='gray10')
+        self.s.configure('TLabel', background='gray10', foreground='gainsboro')
+        self.s.configure('TButton', background='gray8', foreground='black')
+        self.s.configure('TEntry', background='gray12', foreground='gainsboro')
+        self.s.configure('TNotebook', background='gray10', foreground='black')
 
-    def rgbmode(self):
-        if rgbon:
+    def randmode(self):
+        if randon:
             self.randombg = random.choice(self.tkintercolorlist)
             self.randomtxt = random.choice(self.tkintercolorlist)
             self.randomfigcolor = random.choice(self.matplotcolorlist)
@@ -417,148 +454,157 @@ class controller(tk.Tk):
             self.canvas2.draw()
             self.canvas3.draw()
 
-        self.after(500, self.rgbmode)
+        self.after(500, self.randmode)
+
+    def rgbcycle(self):
+        if rgbon:
+
+            self.coloriter += 1
+
+            color = self.colorcycle[self.coloriter]
+
+            try:
+                self.fig1.set_facecolor(str(color))
+                self.fig2.set_facecolor(str(color))
+                self.fig3.set_facecolor(str(color))
+            except:
+                print('bad color')
+
+            self.canvas.draw()
+            self.canvas2.draw()
+            self.canvas3.draw()
+
+
+            if self.coloriter == len(self.colorcycle) - 1:
+                self.coloriter = -1
+
+        self.after(50, self.rgbcycle)
+
 
     def scanning(self):
-        with open('temps.txt','a') as temptxt:
+        with open('temporary.csv', 'a') as file:
             if running:
-                self.list.append(RadicalTemps(self.LJ, 0, 1))
-                self.timelist.append(len(self.list))
-                self.GoldProbeTemp = round(self.list[-1][0], 3)
-                self.SSProbeTemp = round(self.list[-1][1], 3)
+                tick = time.time()
+                self.time += 1
+                self.j += 1
+                if self.j == 10:
+                    self.j = 0
+                    np.savetxt(file, self.DataTable, delimiter=',')
+                    self.DataTable = np.zeros((10,9))
+
+                self.temperatures = RadicalTemps(self.LJ, 0, 1)
+                self.GoldProbeTemp = self.temperatures[0]
+                self.SSProbeTemp = self.temperatures[1]
                 self.DifferenceTemp = round((self.GoldProbeTemp - self.SSProbeTemp), 3)
-                self.GoldProbeTempList.append(self.GoldProbeTemp)
-                self.SSProbeTempList.append(self.SSProbeTemp)
-                self.PlasmaPowerList.append(self.plasmapower)
-                self.FlowRateList.append(self.flowrate)
 
-                self.GoldProbe['text'] = str(self.GoldProbeTemp)
-                self.SSProbe['text'] = str(self.SSProbeTemp)
-                self.Difference['text'] = str(self.DifferenceTemp)
-                self.maxlim1 = 1.25 * max(max(self.list))
+                self.GoldProbe['text'] = "{:0.3e}".format(self.GoldProbeTemp)
+                self.SSProbe['text'] = "{:0.3e}".format(self.SSProbeTemp)
+                self.Difference['text'] = "{:0.3e}".format(self.DifferenceTemp)
 
+                if self.time == 0:
+                    self.xmax2 = 1
+                else:
+                    self.xmax2 = self.time
 
-                self.last60 = self.list[-60:]
-                self.maxlim2 = 1.25 * max(max(self.last60))
-
-                self.xmax2 = self.timelist[-1]
-
-                if (self.timelist[-1] - 60) <= 0:
+                if self.time <= 60:
                     self.xmax1 = 0
                 else:
-                    self.xmax1 = self.xmax2 - 60
+                    self.xmax1 = self.time - 60
 
 
                 self.chi = 12.19905 + 0.01942087*self.SSProbeTemp - 0.000007456439*(self.SSProbeTemp**2)
-            #    self.Conductivity['text'] = str(round(self.chi, 3))
+                #    self.Conductivity['text'] = str(round(self.chi, 3))
 
 
                 self.RadicalDensityValue = GetRadicalDensity(TempA=self.GoldProbeTemp, TempB=self.SSProbeTemp, S=A, Chi=self.chi, W_D=WD, A=SA, L=L, LambdaA=GammaGold, LambdaB=GammaSS)
                 self.RadicalDensity['text'] = "{:0.3e}".format(self.RadicalDensityValue)
-                self.RadicalDensityList.append(self.RadicalDensityValue)
-                self.maxlim3 = 10 * max(self.RadicalDensityList)
-                self.Radical60 = self.RadicalDensityList[-60:]
-                self.maxlim4 = 10 * max(self.Radical60)
+                if self.RadicalDensityValue >= self.radmax:
+                    self.radmax = self.RadicalDensityValue
 
                 self.ConvectronPressureValue = correct(ConvectronPressure(self.LJ, 2))
-                self.ConvectronPressureList.append(self.ConvectronPressureValue)
                 self.ConvectronPressure['text'] = str(round(self.ConvectronPressureValue,3))
-                self.pressureylim1 = 10 * max(self.ConvectronPressureList)
-                self.pressureylim2 = 10 * max(self.ConvectronPressureList[-60:])
+                if self.ConvectronPressureValue >= self.maxconpressure:
+                    self.maxconpressure = self.ConvectronPressureValue
 
                 self.BaratronPressureValue = BaratronPressure(self.LJ, 3)
-                self.BaratronPressureList.append(self.BaratronPressureValue)
                 self.BaratronPressure['text'] = "{:0.3e}".format(self.BaratronPressureValue)
 
                 self.IonGaugePressureValue = IonGaugePressure(self.LJ, 4)
-                if self.IonGaugePressureValue == 'Ion Gauge Off':
-                    self.IonGaugePressureList.append(np.nan)
-                    self.IonGaugePressure['text'] = 'Ion Gauge Off'
-                else:
-                    self.IonGaugePressureList.append(self.IonGaugePressureValue)
-                    try:
-                        self.IonGaugePressure['text'] = "{:0.3e}".format(self.IonGaugePressureValue)
-                    except:
-                        self.IonGaugePressure['text'] = str(self.IonGaugePressureValue)
+                try:
+                    self.IonGaugePressure['text'] = "{:0.3e}".format(self.IonGaugePressureValue)
+                except:
+                    self.IonGaugePressure['text'] = str(self.IonGaugePressureValue)
 
+                self.DataTable[self.j, 0] = self.time
+                self.DataTable[self.j, 1] = self.GoldProbeTemp
+                self.DataTable[self.j, 2] = self.SSProbeTemp
+                self.DataTable[self.j, 3] = self.RadicalDensityValue
+                self.DataTable[self.j, 4] = self.ConvectronPressureValue
+                self.DataTable[self.j, 5] = self.BaratronPressureValue
+                try:
+                    self.DataTable[self.j, 6] = self.IonGaugePressureValue
+                except:
+                    self.DataTable[self.j, 6] = np.nan
+                self.DataTable[self.j, 7] = self.plasmapower
+                self.DataTable[self.j, 8] = self.flowrate
 
-                self.plot1.remove()
-                self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
-                self.plot1.set_xlabel('Time (s)')
-                self.plot1.set_ylabel('Temperature (deg C)')
-                self.plot1.set_title('Temperature(deg C)')
-                self.plot1.plot(self.timelist, self.GoldProbeTempList, color='orange')
-                self.plot1.plot(self.timelist, self.SSProbeTempList, color='blue')
+                self.goldline.set_xdata(np.append(self.goldline.get_xdata(), self.time))
+                self.goldline.set_ydata(np.append(self.goldline.get_ydata(), self.GoldProbeTemp))
+                self.ssline.set_xdata(np.append(self.ssline.get_xdata(), self.time))
+                self.ssline.set_ydata(np.append(self.ssline.get_ydata(), self.SSProbeTemp))
+                self.plot1.relim()
+                self.plot1.autoscale_view()
 
+                self.goldline60.set_xdata(np.append(self.goldline60.get_xdata(), self.time))
+                self.goldline60.set_ydata(np.append(self.goldline60.get_ydata(), self.GoldProbeTemp))
+                self.ssline60.set_xdata(np.append(self.ssline60.get_xdata(), self.time))
+                self.ssline60.set_ydata(np.append(self.ssline60.get_ydata(), self.SSProbeTemp))
+                self.plot2.relim()
+                self.plot2.set_xlim(self.xmax1, self.xmax2)
+                self.plot2.autoscale_view()
 
-                self.plot2.remove()
-                self.plot2 = self.fig1.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(0, self.maxlim2))
-                self.plot2.set_xlabel('Time (s)')
-                self.plot2.set_ylabel('Temperature (deg C)')
-                self.plot2.set_title('Temperature(deg C)')
-                self.plot2.plot(self.timelist[-60:], self.GoldProbeTempList[-60:], color='orange')
-                self.plot2.plot(self.timelist[-60:], self.SSProbeTempList[-60:], color='blue')
+                self.radline.set_xdata(np.append(self.radline.get_xdata(), self.time))
+                self.radline.set_ydata(np.append(self.radline.get_ydata(), self.RadicalDensityValue))
+                self.plot3.relim()
+                self.plot3.set_ylim(1e17, self.radmax*5)
+                self.plot3.autoscale_view()
+                #self.plot3.set_yscale('log')
+
+                self.radline60.set_xdata(np.append(self.radline60.get_xdata(), self.time))
+                self.radline60.set_ydata(np.append(self.radline60.get_ydata(), self.RadicalDensityValue))
+                self.plot4.set_ylim(1e17, self.radmax*5)
+                self.plot4.set_xlim(self.xmax1, self.xmax2)
+                self.plot4.autoscale_view()
+                #self.plot4.set_yscale('log')
+
+                self.pressureline.set_xdata(np.append(self.pressureline.get_xdata(), self.time))
+                self.pressureline.set_ydata(np.append(self.pressureline.get_ydata(), self.ConvectronPressureValue))
+                self.plot5.relim()
+                self.plot5.set_ylim(0.0001, self.maxconpressure * 5)
+                self.plot5.autoscale_view()
+                #self.plot5.set_yscale('log')
+
+                self.pressureline60.set_xdata(np.append(self.pressureline60.get_xdata(), self.time))
+                self.pressureline60.set_ydata(np.append(self.pressureline60.get_ydata(), self.ConvectronPressureValue))
+                self.plot6.set_ylim(0.0001, self.maxconpressure * 5)
+                self.plot6.set_xlim(self.xmax1, self.xmax2)
+                self.plot6.autoscale_view()
+                #self.plot6.set_yscale('log')
+
+                if self.time  >= 2:
+                    self.plot5.set_yscale('log')
+                    self.plot6.set_yscale('log')
 
                 self.canvas.draw()
-
-                self.plot3.remove()
-                self.plot3 = self.fig2.add_subplot(211, ylim=(1e19,self.maxlim3),yscale='log')
-                self.plot3.set_xlabel('Time (s)')
-                self.plot3.set_ylabel('Radical Density')
-                #self.plot3.set_yscale('log')
-                self.plot3.set_title('Radical Density')
-                self.plot3.plot(self.timelist, self.RadicalDensityList, color='green')
-
-                self.plot4.remove()
-                self.plot4 = self.fig2.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(1e19,self.maxlim4),yscale='log')
-                self.plot4.set_xlabel('Time (s)')
-                self.plot4.set_ylabel('Radical Density')
-                #self.plot4.set_yscale('log')
-                self.plot4.set_title('Radical Density (n/m3)')
-                self.plot4.plot(self.timelist[-60:], self.RadicalDensityList[-60:], color='red')
-
-
                 self.canvas2.draw()
-
-                self.plot5.remove()
-                self.plot5 = self.fig3.add_subplot(211, ylim=(1e-6,self.pressureylim1))
-                self.plot5.set_xlabel('Time (s)')
-                self.plot5.set_ylabel('Pressure (Torr)')
-                self.plot5.set_yscale('log')
-                self.plot5.set_title('Pressure')
-                self.plot5.plot(self.timelist, self.ConvectronPressureList, color='purple')
-                self.plot5.plot(self.timelist, self.BaratronPressureList, color='blue')
-                for pressure in self.IonGaugePressureList:
-                    self.plot5.plot(self.timelist, self.IonGaugePressureList, color='green')
-
-
-                self.plot6.remove()
-                self.plot6 = self.fig3.add_subplot(212, xlim=(self.xmax1, self.xmax2), ylim=(1e-6,self.pressureylim2),yscale='log')
-                self.plot6.set_xlabel('Time (s)')
-                self.plot6.set_ylabel('Pressure (Torr)')
-            #    self.plot6.set_yscale('log')
-                self.plot6.set_title('Pressure')
-                self.plot6.plot(self.timelist[-60:], self.ConvectronPressureList[-60:], color='gold')
                 self.canvas3.draw()
 
-
-
-
-
-        self.after(1000, self.scanning)
-
-    def exportdata(self):
-        self.totallist = []
-        self.fields = ['Time', 'Gold Probe Temperature', 'Stainless Steel Probe Temperature', 'Radical Density']
-        for i in range(len(self.list)):
-            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i]]
-            self.totallist.append(newentry)
-        print(self.totallist)
-        with open('TemperatureList.csv', 'a') as templist:
-            writer = csv.writer(templist)
-
-            writer.writerow(self.fields)
-            writer.writerows(self.totallist)
+                tock = time.time()
+                delay = 1000 * int(tock - tick)
+        try:
+            self.after(1000 - delay, self.scanning)
+        except UnboundLocalError:
+            self.after(1000, self.scanning)
 
     def choosefile(self):
         self.totallist = []
@@ -570,8 +616,18 @@ class controller(tk.Tk):
                 ('CSV Files', '.csv'),
                 ('Text Files', '.txt')
             ])
-        print(os.path.basename(self.file))
-        for i in range(len(self.list)):
+
+        self.timelist = df['Time'].tolist()
+        self.GoldProbeTempList = df['Gold Probe Temperature'].tolist()
+        self.SSProbeTempList = df['Stainless Steel Probe Temperature'].tolist()
+        self.PlasmaPowerList = df['Plasma Power'].tolist()
+        self.FlowRateList = df['Flow Rate'].tolist()
+        self.ConvectronPressureList = df['Convectron Pressure'].tolist()
+        self.BaratronPressureList = df['Baratron Pressure'].tolist()
+        self.IonGaugePressureList = df['Ion Gauge Pressure'].tolist()
+        self.RadicalDensityList = df['Radical Density'].tolist()
+
+        for i in range(len(self.timelist)):
             newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i]]
             self.totallist.append(newentry)
 
@@ -583,22 +639,76 @@ class controller(tk.Tk):
 
         self.ExportData.grid_forget()
 
-    def reset(self):
-        self.list.clear()
-        self.timelist.clear()
-        self.GoldProbeTempList.clear()
-        self.SSProbeTempList.clear()
-        self.PlasmaPowerList.clear()
-        self.FlowRateList.clear()
-        self.ConvectronPressureList.clear()
-        self.BaratronPressureList.clear()
-        self.IonGaugePressureList.clear()
+    def resetconfirm(self):
+        self.ResetPlot.grid_forget()
+        self.ResetConfirm.grid(row=15,column=0,columnspan=1,sticky='ew')
+        self.ResetCancel.grid(row=15,column=1,columnspan=1,sticky='ew')
 
-        print(self.list)
+    def resetcancel(self):
+        self.ResetConfirm.grid_forget()
+        self.ResetCancel.grid_forget()
+        self.ResetPlot.grid(row=15, columnspan=2,sticky='ew')
+
+    def reset(self):
+        self.ResetConfirm.grid_forget()
+        self.ResetCancel.grid_forget()
+        self.ExportData.grid(row=14, columnspan=2,sticky='ew')
+        self.ResetPlot.grid(row=15, columnspan=2,sticky='ew')
+
+        self.plot1.remove()
+        self.plot1 = self.fig1.add_subplot(211, ylim=(0,self.maxlim1))
+        self.plot1.set_xlabel('Time (s)')
+        self.plot1.set_ylabel('Temperature (deg C)')
+        self.goldline, = self.plot1.plot([],[],'orange')
+        self.ssline, = self.plot1.plot([],[],'blue')
+
+        self.plot2.remove()
+        self.plot2 = self.fig1.add_subplot(212, ylim=(0, self.maxlim1))
+        self.plot2.set_xlabel('Time (s)')
+        self.plot2.set_ylabel('Temperature (deg C)')
+        self.goldline60, = self.plot2.plot([],[],'orange')
+        self.ssline60, = self.plot2.plot([],[],'blue')
+
+        self.plot3.remove()
+        self.plot3 = self.fig2.add_subplot(211, ylim=(0,self.maxlim3))
+        self.plot3.set_xlabel('Time (s)')
+        self.plot3.set_ylabel('Radical Density')
+        self.radline, = self.plot3.plot([],[],'green')
+
+        self.plot4.remove()
+        self.plot4 = self.fig2.add_subplot(212, ylim=(0,self.maxlim4))
+        self.plot4.set_xlabel('Time (s)')
+        self.plot4.set_ylabel('Radical Density')
+        self.radline60, = self.plot4.plot([],[],'green')
+
+        self.plot5.remove()
+        self.plot5 = self.fig3.add_subplot(211, ylim=(0,self.pressureylim1))
+        self.plot5.set_xlabel('Time (s)')
+        self.plot5.set_ylabel('Pressure (Torr)')
+        self.pressureline, = self.plot5.plot([],[],'purple')
+
+        self.plot6.remove()
+        self.plot6 = self.fig3.add_subplot(212, ylim=(0,self.pressureylim2))
+        self.plot6.set_xlabel('Time (s)')
+        self.plot6.set_ylabel('Pressure (Torr)')
+        self.pressureline60, = self.plot6.plot([],[],'purple')
+
+        self.canvas.draw()
+        self.canvas2.draw()
+        self.canvas3.draw()
+
+        resetfile=open('temporary.csv', 'w')
+        resetfile.truncate(0)
+
+        self.DataTable = np.zeros((10, 9))
+
+        self.time = 0
+
 
 if __name__ == '__main__':
     app = controller()
     app.wm_title('TUFCON Controller')
     app.after(1000, app.scanning)
-    app.after(1000, app.rgbmode)
+    app.after(1000, app.randmode)
+    app.after(1000, app.rgbcycle)
     app.mainloop()
