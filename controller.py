@@ -82,7 +82,7 @@ class controller(tk.Tk):
         print(len(self.colorcycle))
 
 
-        #self.LJ = u6.U6()
+        self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
