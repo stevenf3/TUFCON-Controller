@@ -23,6 +23,7 @@ from colour import Color
 
 running = False
 rgbon = False
+randon = False
 WD = 7.18 * (10**-19) ##J/molecule, dissociation energy
 L = 6.35 * (10**-3) ##m length of exposed probe
 D = 0.508 * (10**-3) ##m (diameter of probe)
@@ -44,6 +45,7 @@ class controller(tk.Tk):
 
         self.time = -1
         self.j = -1
+        self.coloriter = -1
 
         self.tempfileheader = ['Time','Gold Probe Temperature','Stainless Steel Probe Temperature','Radical Density','Convectron Pressure','BaratronPressure','Ion Gauge Pressure','Plasma Power','Flow Rate']
 
@@ -60,15 +62,27 @@ class controller(tk.Tk):
 
         self.tkintercolorlist = tkintercolorlist()
         self.rgbvalue = 0
+        self.randvalue = 0
         self.DataTable = np.zeros((10, 9))
 
-        self.LJ = u6.U6()
-
         self.red = Color('red')
-        self.blue = Color('blue')
-        self.colorsRB = list(self.red.range_to(Color('blue'),12))
-        self.colorsBR = list(self.blue.range_to(Color('red'),12))
-        self.colorsRB.append(self.colorsBR)
+        self.colorcycle = list(self.red.range_to(Color('blue'),288))
+
+        for color in reversed(self.colorcycle):
+            self.colorcycle.append(color)
+        excludedcolorindex = []
+        for i in range(len(self.colorcycle)):
+            if len(str(self.colorcycle[i])) != 7:
+                excludedcolorindex.append(i)
+
+        print(len(excludedcolorindex))
+        for excolor in reversed(excludedcolorindex):
+            self.colorcycle.pop(excolor)
+
+        print(len(self.colorcycle))
+
+
+        #self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -200,10 +214,13 @@ class controller(tk.Tk):
         self.ResetPlot.grid_forget()
 
         self.DarkModeButton = ttk.Button(self.frame2s, text='Dark Mode', command=self.darkmode)
-        self.DarkModeButton.grid(row=0, columnspan=2, sticky='ew')
+        self.DarkModeButton.grid(row=0,column=0, columnspan=1, sticky='ew')
 
-        self.RGBButton = ttk.Button(self.frame2s, text='Gamer Mode', command=self.rgbcycle)
-        self.RGBButton.grid(row=0, column=2, columnspan=2,sticky='ew')
+        self.RGBButton = ttk.Button(self.frame2s, text='RGB Mode', command=self.startrgb)
+        self.RGBButton.grid(row=0, column=2, columnspan=1,sticky='ew')
+
+        self.RandButton = ttk.Button(self.frame2s, text='Random Mode', command=self.startrand)
+        self.RandButton.grid(row=0, column=1, columnspan=1,sticky='ew')
 
         self.ConvectronPressureLabel = ttk.Label(self.frame1, text='Convectron Pressure (Torr):')
         self.ConvectronPressureLabel.grid(row=4, column=0,sticky='ew')
@@ -393,6 +410,15 @@ class controller(tk.Tk):
             self.canvas3.draw()
             self.DarkModeButton['text'] = 'Dark Mode'
 
+    def startrand(self):
+        global randon
+        if self.randvalue == 0:
+            self.randvalue = 1
+            randon = True
+
+        elif self.randvalue == 1:
+            self.randvalue = 0
+            randon = False
 
     def startrgb(self):
         global rgbon
@@ -404,8 +430,14 @@ class controller(tk.Tk):
             self.rgbvalue = 0
             rgbon = False
 
-    def rgbmode(self):
-        if rgbon:
+        self.s.configure('TFrame', background='gray10')
+        self.s.configure('TLabel', background='gray10', foreground='gainsboro')
+        self.s.configure('TButton', background='gray8', foreground='black')
+        self.s.configure('TEntry', background='gray12', foreground='gainsboro')
+        self.s.configure('TNotebook', background='gray10', foreground='black')
+
+    def randmode(self):
+        if randon:
             self.randombg = random.choice(self.tkintercolorlist)
             self.randomtxt = random.choice(self.tkintercolorlist)
             self.randomfigcolor = random.choice(self.matplotcolorlist)
@@ -422,17 +454,32 @@ class controller(tk.Tk):
             self.canvas2.draw()
             self.canvas3.draw()
 
-        self.after(500, self.rgbmode)
+        self.after(500, self.randmode)
 
     def rgbcycle(self):
-        global rgbon
-        if self.rgbvalue == 0:
-            self.rgbvalue = 1
-            rgbon = True
+        if rgbon:
 
-        elif self.rgbvalue == 1:
-            self.rgbvalue = 0
-            rgbon = False
+            self.coloriter += 1
+
+            color = self.colorcycle[self.coloriter]
+
+            try:
+                self.fig1.set_facecolor(str(color))
+                self.fig2.set_facecolor(str(color))
+                self.fig3.set_facecolor(str(color))
+            except:
+                print('bad color')
+
+            self.canvas.draw()
+            self.canvas2.draw()
+            self.canvas3.draw()
+
+
+            if self.coloriter == len(self.colorcycle) - 1:
+                self.coloriter = -1
+
+        self.after(50, self.rgbcycle)
+
 
     def scanning(self):
         with open('temporary.csv', 'a') as file:
@@ -662,5 +709,6 @@ if __name__ == '__main__':
     app = controller()
     app.wm_title('TUFCON Controller')
     app.after(1000, app.scanning)
-    app.after(1000, app.rgbmode)
+    app.after(1000, app.randmode)
+    app.after(1000, app.rgbcycle)
     app.mainloop()

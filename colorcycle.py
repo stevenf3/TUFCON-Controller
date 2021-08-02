@@ -45,9 +45,10 @@ class ColorCycle(tk.Tk):
         self.red = Color('red')
         self.blue = Color('blue')
         self.colorsRB = list(self.red.range_to(Color('blue'),144))
-        self.colorsBR = list(self.blue.range_to(Color('red'),144))
-        self.colorsRB.append(self.colorsBR)
 
+        for color in reversed(self.colorsRB):
+            print(color)
+            self.colorsRB.append(color)
 
         print(self.colorsRB)
         self.fig1 = Figure(figsize=(5,5), dpi=100)
