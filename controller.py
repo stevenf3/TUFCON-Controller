@@ -478,7 +478,7 @@ class controller(tk.Tk):
             if self.coloriter == len(self.colorcycle) - 1:
                 self.coloriter = -1
 
-        self.after(50, self.rgbcycle)
+        self.after(25, self.rgbcycle)
 
 
     def scanning(self):
