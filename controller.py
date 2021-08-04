@@ -371,7 +371,7 @@ class controller(tk.Tk):
 
         self.readstop = time.time()
         print('total time:', self.readstop - self.readstart)
-        print('time lost', self.time - (self.readstop - self.readstart))
+        print('time lost', (self.readstop - self.readstart) - self.time)
 
     def logpower(self):
         self.plasmapower = self.PowerEntry.get()
@@ -661,7 +661,8 @@ class controller(tk.Tk):
                 self.canvas3.draw()
 
                 tock = time.time()
-                delay = 1000 * int(tock - tick)
+                delay = int(1000 * (tock - tick))
+                print(delay)
         try:
             self.after(1000 - delay, self.scanning)
         except UnboundLocalError:
@@ -770,6 +771,6 @@ if __name__ == '__main__':
     app = controller()
     app.wm_title('TUFCON Controller')
     app.after(1000, app.scanning)
-    app.after(1000, app.randmode)
-    app.after(1000, app.rgbcycle)
+    app.after(50, app.randmode)
+    app.after(50, app.rgbcycle)
     app.mainloop()
