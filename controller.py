@@ -349,6 +349,8 @@ class controller(tk.Tk):
             self.ExportData['state']=tk.DISABLED
             self.ResetPlot['state']=tk.DISABLED
 
+        self.readstart = time.time()
+
     def stopscan(self):
         global running
         running = False
@@ -366,6 +368,10 @@ class controller(tk.Tk):
         print('RD:',df['Radical Density'])
         print('CP:', df['Convectron Pressure'])
         print(df)
+
+        self.readstop = time.time()
+        print('total time:', self.readstop - self.readstart)
+        print('time lost', self.time - (self.readstop - self.readstart))
 
     def logpower(self):
         self.plasmapower = self.PowerEntry.get()
