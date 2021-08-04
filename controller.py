@@ -51,6 +51,7 @@ class controller(tk.Tk):
         self.tempfileheader = ['Time','Gold Probe Temperature','Stainless Steel Probe Temperature','Radical Density','Convectron Pressure','BaratronPressure','Ion Gauge Pressure','Plasma Power','Flow Rate']
 
         self.temporaryfile = 'temporary.csv'
+        self.colordelay = 0
 
         self.s = ttk.Style()
         self.s.configure('.', font=('Cambria'), fontsize=16)
@@ -442,6 +443,7 @@ class controller(tk.Tk):
             randon = False
 
     def startrgb(self):
+        self.colortick = 0
         global rgbon
         if self.rgbvalue == 0:
             self.rgbvalue = 1
@@ -478,6 +480,7 @@ class controller(tk.Tk):
         self.after(500, self.randmode)
 
     def rgbcycle(self):
+        self.colortick = time.time()
         if rgbon:
 
             self.coloriter += 1
@@ -500,6 +503,8 @@ class controller(tk.Tk):
                 self.coloriter = -1
 
         self.after(50, self.rgbcycle)
+        self.colortock = time.time()
+        self.colordelay = int(1000 * (self.colortock - self.colortick))
 
     def bgcolorchooser(self):
         colors = askcolor(title='Background Color Chooser')
@@ -661,7 +666,7 @@ class controller(tk.Tk):
                 self.canvas3.draw()
 
                 tock = time.time()
-                delay = int(1000 * (tock - tick))
+                delay = int(1000 * (tock - tick)) + self.colordelay
                 print(delay)
         try:
             self.after(1000 - delay, self.scanning)
