@@ -361,6 +361,7 @@ class controller(tk.Tk):
         self.readstart = time.time()
 
     def stopscan(self):
+        self.readstop = time.time()
         global running
         running = False
         self.ExportData.grid(row=14, columnspan=2, sticky='ew')
@@ -378,7 +379,13 @@ class controller(tk.Tk):
         print('CP:', df['Convectron Pressure'])
         print(df)
 
-        self.readstop = time.time()
+        self.langarray = np.empty((self.time,1))
+        self.langarray[:] = np.nan
+        self.langlist = self.langarray.tolist()
+        for k in self.langindexlist:
+            self.langlist[k] = k
+
+        print(self.langlist)
         print('total time:', self.readstop - self.readstart)
         print('time lost', (self.readstop - self.readstart) - self.time)
 
