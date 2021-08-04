@@ -20,6 +20,7 @@ import random
 import time
 from conbarconversion import *
 from colour import Color
+from tkinter.colorchooser import askcolor
 
 running = False
 rgbon = False
@@ -64,6 +65,8 @@ class controller(tk.Tk):
         self.rgbvalue = 0
         self.randvalue = 0
         self.DataTable = np.zeros((10, 9))
+        self.StoredAvg = np.zeros((1,2))
+        self.alternator = 0
 
         self.red = Color('red')
         self.colorcycle = list(self.red.range_to(Color('blue'),288))
@@ -75,11 +78,8 @@ class controller(tk.Tk):
             if len(str(self.colorcycle[i])) != 7:
                 excludedcolorindex.append(i)
 
-        print(len(excludedcolorindex))
         for excolor in reversed(excludedcolorindex):
             self.colorcycle.pop(excolor)
-
-        print(len(self.colorcycle))
 
 
         #self.LJ = u6.U6()
@@ -303,6 +303,14 @@ class controller(tk.Tk):
         self.ResetConfirm.grid(row=15, column=1, columnspan=1)
         self.ResetConfirm.grid_forget()
 
+        self.BGColorChooser = ttk.Button(self.frame2s, text='Color Chooser', command=self.bgcolorchooser)
+        self.BGColorChooser.grid(row=1, column=3)
+
+        self.FigureColorChooser = ttk.Button(self.frame2s, text='Color Chooser', command=self.figurecolorchooser)
+        self.FigureColorChooser.grid(row=3, column=3)
+
+        self.TextColorChooser = ttk.Button(self.frame2s, text='Color Chooser', command=self.textcolorchooser)
+        self.TextColorChooser.grid(row=2, column=3)
     def onclose(self):
         plt.close('all')
         self.destroy()
@@ -480,6 +488,31 @@ class controller(tk.Tk):
 
         self.after(50, self.rgbcycle)
 
+    def bgcolorchooser(self):
+        colors = askcolor(title='Background Color Chooser')
+        self.s.configure('TFrame', background=colors[1])
+        self.s.configure('TNotebook', background=colors[1])
+        self.s.configure('TLabel', background=colors[1])
+        self.s.configure('TButton', background=colors[1])
+
+    def figurecolorchooser(self):
+        colors = askcolor(title='Button Color Chooser')
+        self.fig1.set_facecolor(str(colors[1]))
+        self.fig2.set_facecolor(str(colors[1]))
+        self.fig3.set_facecolor(str(colors[1]))
+        self.canvas.draw()
+        self.canvas2.draw()
+        self.canvas3.draw()
+
+
+    def textcolorchooser(self):
+        colors = askcolor(title='Button Color Chooser')
+        self.s.configure('TFrame', foreground=colors[1])
+        self.s.configure('TButton', foreground=colors[1])
+        self.s.configure('TNotebook', foreground=colors[1])
+        self.s.configure('TLabel', foreground=colors[1])
+        self.s.configure('TEntry', foreground=colors[1])
+
 
     def scanning(self):
         with open('temporary.csv', 'a') as file:
@@ -488,6 +521,19 @@ class controller(tk.Tk):
                 self.time += 1
                 self.j += 1
                 if self.j == 10:
+                    if self.alternator == 0:
+                        self.alternator = 1
+                        self.StoredAvg[0,0] = np.mean(self.DataTable[:,3])
+                    if self.alternator == 1:
+                        self.alternator = 0
+                        self.StoredAvg[0,1] = np.mean(self.DataTable[:,3])
+
+                    self.percchange = 1 - abs(self.StoredAvg[0,1] / self.StoredAvg[0,0])
+                    if self.perchange <= 1:
+                        print('steady state')
+
+
+
                     self.j = 0
                     np.savetxt(file, self.DataTable, delimiter=',')
                     self.DataTable = np.zeros((10,9))
