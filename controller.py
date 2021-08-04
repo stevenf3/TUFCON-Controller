@@ -332,7 +332,6 @@ class controller(tk.Tk):
         self.destroy()
 
     def startscan(self):
-        print('button pressed')
         tempfile=open('temporary.csv', 'w')
         tempfile.truncate(0)
         tempfilewriter = csv.writer(tempfile)
@@ -375,17 +374,14 @@ class controller(tk.Tk):
         self.ExportData['state']='normal'
         self.ResetPlot['state']='normal'
         df = pd.read_csv('temporary.csv')
-        print('RD:',df['Radical Density'])
-        print('CP:', df['Convectron Pressure'])
         print(df)
 
         self.langarray = np.empty((self.time,1))
         self.langarray[:] = np.nan
         self.langlist = self.langarray.tolist()
         for k in self.langindexlist:
-            self.langlist[k] = k
+            self.langlist[k] = self.langfilelist[self.langindexlist.index(k)]
 
-        print(self.langlist)
         print('total time:', self.readstop - self.readstart)
         print('time lost', (self.readstop - self.readstart) - self.time)
 
@@ -699,6 +695,7 @@ class controller(tk.Tk):
             ])
 
         self.timelist = df['Time'].tolist()
+        print(len(self.timelist))
         self.GoldProbeTempList = df['Gold Probe Temperature'].tolist()
         self.SSProbeTempList = df['Stainless Steel Probe Temperature'].tolist()
         self.PlasmaPowerList = df['Plasma Power'].tolist()
@@ -708,8 +705,9 @@ class controller(tk.Tk):
         self.IonGaugePressureList = df['Ion Gauge Pressure'].tolist()
         self.RadicalDensityList = df['Radical Density'].tolist()
 
+        print(len(self.timelist), len(self.langlist))
         for i in range(len(self.timelist)):
-            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i]]
+            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i], self.langlist[i]]
             self.totallist.append(newentry)
 
         with open(self.file, 'w') as savefile:
@@ -791,6 +789,7 @@ class controller(tk.Tk):
         self.langfilelist.append(langfilename)
         print(self.time, langfilename)
         print(self.langfilelist)
+        print(self.langindexlist)
 
 
 if __name__ == '__main__':
