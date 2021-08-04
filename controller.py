@@ -47,6 +47,8 @@ class controller(tk.Tk):
         self.time = -1
         self.j = -1
         self.coloriter = -1
+        self.langindexlist = []
+        self.langfilelist = []
 
         self.tempfileheader = ['Time','Gold Probe Temperature','Stainless Steel Probe Temperature','Radical Density','Convectron Pressure','BaratronPressure','Ion Gauge Pressure','Plasma Power','Flow Rate']
 
@@ -83,7 +85,7 @@ class controller(tk.Tk):
             self.colorcycle.pop(excolor)
 
 
-        self.LJ = u6.U6()
+        #self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -318,6 +320,12 @@ class controller(tk.Tk):
 
         self.SteadyStateIndicator = ttk.Label(self.frame1, text='', background='red')
         self.SteadyStateIndicator.grid(row=9, column=1, columnspan=1, sticky='ew')
+
+        self.LogLangmuir = ttk.Button(self.frame3, text='Log Langmuir Probe Data', command=self.loglangmuir)
+        self.LogLangmuir.grid(row=17,columnspan=2, sticky='ew')
+
+        self.LangmuirEntry = ttk.Entry(self.frame3)
+        self.LangmuirEntry.grid(row=16,columnspan=2,sticky='ew')
 
     def onclose(self):
         plt.close('all')
@@ -770,6 +778,13 @@ class controller(tk.Tk):
         self.DataTable = np.zeros((10, 9))
 
         self.time = 0
+
+    def loglangmuir(self):
+        self.langindexlist.append(self.time)
+        langfilename = self.LangmuirEntry.get()
+        self.langfilelist.append(langfilename)
+        print(self.time, langfilename)
+        print(self.langfilelist)
 
 
 if __name__ == '__main__':
