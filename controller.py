@@ -82,7 +82,7 @@ class controller(tk.Tk):
             self.colorcycle.pop(excolor)
 
 
-        #self.LJ = u6.U6()
+        self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -536,8 +536,10 @@ class controller(tk.Tk):
                         self.StoredAvg[0,1] = np.mean(self.DataTable[:,3])
 
                     self.percchange = 1 - abs(self.StoredAvg[0,1] / self.StoredAvg[0,0])
-                    if self.perchange <= 1:
+                    if self.percchange <= 1:
                         self.SteadyStateIndicator.config(background='green2')
+                    elif self.percchange >=1:
+                        self.SteadyStateIndicator.config(background='red')
 
 
 
