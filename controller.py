@@ -82,7 +82,7 @@ class controller(tk.Tk):
             self.colorcycle.pop(excolor)
 
 
-        self.LJ = u6.U6()
+        #self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -311,6 +311,13 @@ class controller(tk.Tk):
 
         self.TextColorChooser = ttk.Button(self.frame2s, text='Color Chooser', command=self.textcolorchooser)
         self.TextColorChooser.grid(row=2, column=3)
+
+        self.SteadyStateIndicatorLabel = ttk.Label(self.frame1, text='Steady State Detector:')
+        self.SteadyStateIndicatorLabel.grid(row=9, column=0, columnspan=2, sticky='ew')
+
+        self.SteadyStateIndicator = ttk.Label(self.frame1, text='', background='red')
+        self.SteadyStateIndicator.grid(row=9, column=1, columnspan=1, sticky='ew')
+
     def onclose(self):
         plt.close('all')
         self.destroy()
@@ -524,15 +531,13 @@ class controller(tk.Tk):
                     if self.alternator == 0:
                         self.alternator = 1
                         self.StoredAvg[0,0] = np.mean(self.DataTable[:,3])
-
-                    elif self.alternator == 1:
+                    if self.alternator == 1:
                         self.alternator = 0
                         self.StoredAvg[0,1] = np.mean(self.DataTable[:,3])
 
                     self.percchange = 1 - abs(self.StoredAvg[0,1] / self.StoredAvg[0,0])
-                    print(self.StoredAvg, self.percchange)
-                    if self.percchange <= 0.01:
-                        print('steady state')
+                    if self.perchange <= 1:
+                        self.SteadyStateIndicator.config(background='green2')
 
 
 
