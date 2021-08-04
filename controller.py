@@ -85,7 +85,7 @@ class controller(tk.Tk):
             self.colorcycle.pop(excolor)
 
 
-        #self.LJ = u6.U6()
+        self.LJ = u6.U6()
 
         self.maxlim1 = 40
         self.maxlim2 = 40
@@ -675,7 +675,6 @@ class controller(tk.Tk):
 
                 tock = time.time()
                 delay = int(1000 * (tock - tick)) + self.colordelay
-                print(delay)
         try:
             self.after(1000 - delay, self.scanning)
         except UnboundLocalError:
