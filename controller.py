@@ -321,7 +321,7 @@ class controller(tk.Tk):
         self.SteadyStateIndicator = ttk.Label(self.frame1, text='', background='red')
         self.SteadyStateIndicator.grid(row=9, column=1, columnspan=1, sticky='ew')
 
-        self.LogLangmuir = ttk.Button(self.frame3, text='Log Langmuir Probe Data', command=self.loglangmuir)
+        self.LogLangmuir = ttk.Button(self.frame3, text='Log Langmuir Probe Data', command=self.loglangmuir, state=tk.DISABLED)
         self.LogLangmuir.grid(row=17,columnspan=2, sticky='ew')
 
         self.LangmuirEntry = ttk.Entry(self.frame3)
@@ -354,6 +354,8 @@ class controller(tk.Tk):
             self.PowerEntryButton['state']='normal'
             self.FlowRateEntry['state']='normal'
             self.FlowRateEntryButton['state']='normal'
+            self.LangmuirEntry['state'] = 'normal'
+            self.LogLangmuir['state'] = 'normal'
             self.ExportData['state']=tk.DISABLED
             self.ResetPlot['state']=tk.DISABLED
 
@@ -369,6 +371,8 @@ class controller(tk.Tk):
         self.PowerEntryButton['state'] = tk.DISABLED
         self.FlowRateEntry['state'] = tk.DISABLED
         self.FlowRateEntryButton['state'] = tk.DISABLED
+        self.LangmuirEntry['state'] = tk.DISABLED
+        self.LogLangmuir['state'] = tk.DISABLED
         self.StopScan.grid_forget()
         self.StartScan.grid(row=0, columnspan=2, sticky='ew')
         self.ExportData['state']='normal'
@@ -713,8 +717,6 @@ class controller(tk.Tk):
 
             filewriter.writerow(self.fields)
             filewriter.writerows(self.totallist)
-
-        self.ExportData.grid_forget()
 
     def resetconfirm(self):
         self.ResetPlot.grid_forget()
