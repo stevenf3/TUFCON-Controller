@@ -50,7 +50,7 @@ class controller(tk.Tk):
         self.langindexlist = []
         self.langfilelist = []
 
-        self.tempfileheader = ['Time','Gold Probe Temperature','Stainless Steel Probe Temperature','Radical Density','Convectron Pressure','BaratronPressure','Ion Gauge Pressure','Plasma Power','Flow Rate']
+        self.tempfileheader = ['Time','Gold Probe Temperature','Stainless Steel Probe Temperature','Radical Density','Convectron Pressure','Baratron Pressure','Ion Gauge Pressure','Plasma Power','Flow Rate']
 
         self.temporaryfile = 'temporary.csv'
         self.colordelay = 0
