@@ -691,8 +691,6 @@ class controller(tk.Tk):
             ])
 
         self.timelist = self.df['Time'].tolist()
-        print(len(self.timelist))
-        print(self.timelist)
         self.GoldProbeTempList = self.df['Gold Probe Temperature'].tolist()
         self.SSProbeTempList = self.df['Stainless Steel Probe Temperature'].tolist()
         self.PlasmaPowerList = self.df['Plasma Power'].tolist()
@@ -702,11 +700,13 @@ class controller(tk.Tk):
         self.IonGaugePressureList = self.df['Ion Gauge Pressure'].tolist()
         self.RadicalDensityList = self.df['Radical Density'].tolist()
 
-        print(len(self.timelist), len(self.langlist))
         for i in range(len(self.timelist)):
-            newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i], self.langlist[i]]
-            print(type(self.langlist[i]))
-            self.totallist.append(newentry)
+            if isinstance(self.langlist[i], list):
+                self.newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i], np.nan]
+            elif isinstance(self.langlist[i], list) == False:
+                self.newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i], self.langlist[i]]
+
+            self.totallist.append(self.newentry)
 
         with open(self.file, 'w') as savefile:
             filewriter = csv.writer(savefile)
@@ -785,9 +785,6 @@ class controller(tk.Tk):
         self.langindexlist.append(self.time)
         langfilename = self.LangmuirEntry.get()
         self.langfilelist.append(langfilename)
-        print(self.time, langfilename)
-        print(self.langfilelist)
-        print(self.langindexlist)
 
 
 if __name__ == '__main__':
