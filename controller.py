@@ -374,16 +374,12 @@ class controller(tk.Tk):
         self.ExportData['state']='normal'
         self.ResetPlot['state']='normal'
         self.df = pd.read_csv('temporary.csv')
-        print(self.df)
 
         self.langarray = np.empty((self.time,1))
         self.langarray[:] = np.nan
         self.langlist = self.langarray.tolist()
         for k in self.langindexlist:
             self.langlist[k] = self.langfilelist[self.langindexlist.index(k)]
-
-        print('total time:', self.readstop - self.readstart)
-        print('time lost', (self.readstop - self.readstart) - self.time)
 
     def logpower(self):
         self.plasmapower = self.PowerEntry.get()
@@ -709,6 +705,7 @@ class controller(tk.Tk):
         print(len(self.timelist), len(self.langlist))
         for i in range(len(self.timelist)):
             newentry = [self.timelist[i], self.GoldProbeTempList[i], self.SSProbeTempList[i], self.RadicalDensityList[i], self.ConvectronPressureList[i], self.BaratronPressureList[i], self.IonGaugePressureList[i], self.PlasmaPowerList[i], self.FlowRateList[i], self.langlist[i]]
+            print(type(self.langlist[i]))
             self.totallist.append(newentry)
 
         with open(self.file, 'w') as savefile:
