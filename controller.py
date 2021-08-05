@@ -696,6 +696,7 @@ class controller(tk.Tk):
 
         self.timelist = df['Time'].tolist()
         print(len(self.timelist))
+        print(self.timelist)
         self.GoldProbeTempList = df['Gold Probe Temperature'].tolist()
         self.SSProbeTempList = df['Stainless Steel Probe Temperature'].tolist()
         self.PlasmaPowerList = df['Plasma Power'].tolist()
