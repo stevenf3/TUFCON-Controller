@@ -373,8 +373,8 @@ class controller(tk.Tk):
         self.StartScan.grid(row=0, columnspan=2, sticky='ew')
         self.ExportData['state']='normal'
         self.ResetPlot['state']='normal'
-        df = pd.read_csv('temporary.csv')
-        print(df)
+        self.df = pd.read_csv('temporary.csv')
+        print(self.df)
 
         self.langarray = np.empty((self.time,1))
         self.langarray[:] = np.nan
@@ -694,17 +694,17 @@ class controller(tk.Tk):
                 ('Text Files', '.txt')
             ])
 
-        self.timelist = df['Time'].tolist()
+        self.timelist = self.df['Time'].tolist()
         print(len(self.timelist))
         print(self.timelist)
-        self.GoldProbeTempList = df['Gold Probe Temperature'].tolist()
-        self.SSProbeTempList = df['Stainless Steel Probe Temperature'].tolist()
-        self.PlasmaPowerList = df['Plasma Power'].tolist()
-        self.FlowRateList = df['Flow Rate'].tolist()
-        self.ConvectronPressureList = df['Convectron Pressure'].tolist()
-        self.BaratronPressureList = df['Baratron Pressure'].tolist()
-        self.IonGaugePressureList = df['Ion Gauge Pressure'].tolist()
-        self.RadicalDensityList = df['Radical Density'].tolist()
+        self.GoldProbeTempList = self.df['Gold Probe Temperature'].tolist()
+        self.SSProbeTempList = self.df['Stainless Steel Probe Temperature'].tolist()
+        self.PlasmaPowerList = self.df['Plasma Power'].tolist()
+        self.FlowRateList = self.df['Flow Rate'].tolist()
+        self.ConvectronPressureList = self.df['Convectron Pressure'].tolist()
+        self.BaratronPressureList = self.df['Baratron Pressure'].tolist()
+        self.IonGaugePressureList = self.df['Ion Gauge Pressure'].tolist()
+        self.RadicalDensityList = self.df['Radical Density'].tolist()
 
         print(len(self.timelist), len(self.langlist))
         for i in range(len(self.timelist)):
